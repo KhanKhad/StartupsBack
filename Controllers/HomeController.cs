@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using StartupsBack.Database;
 using StartupsBack.Models;
+using System;
 using System.Diagnostics;
 
 namespace StartupsBack.Controllers
@@ -14,17 +15,31 @@ namespace StartupsBack.Controllers
         {
             _logger = logger;
             _dbContext = dbContext;
+
+            var user = new User()
+            {
+                Name = "sf",
+                Password = "password",
+            };
+            _dbContext.UsersDB.Add(user);
+            _dbContext.SaveChanges();
+
+            var startup = new Startup()
+            {
+                Author = user,
+                Name = "Home",
+                Description = "Home324",
+            };
+
+            _dbContext.StartupsDB.Add(startup);
+            _dbContext.SaveChanges();
         }
 
-        public async Task Index()
+        public async Task<IActionResult> Index()
         {
-            Response.ContentType = "text/html;charset=utf-8";
-            await Response.WriteAsync(_dbContext.UserDB.ToList().Count.ToString());
-        }
+            var users = _dbContext.UsersDB;
 
-        public IActionResult Privacy()
-        {
-            return View();
+            return Json(users);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

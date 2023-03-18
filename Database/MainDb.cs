@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace StartupsBack.Database
@@ -15,17 +16,19 @@ namespace StartupsBack.Database
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Startup>()
+                .HasOne(st => st.Author)
+                .WithMany(user => user.PublishedStartups)
+                .HasForeignKey(st => st.AuthorForeignKey);
+
             modelBuilder.Entity<User>()
                 .HasMany(user => user.History)
-                .WithOne();
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.PublishedStartups)
-                .WithOne(st=>st.Author)
-                .HasForeignKey(st=>st.AuthorForeignKey);
+                .WithMany();
         }
     }
     public class User
     {
+        [Key]
         public int Id { get; set; }
         public string Token { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
@@ -36,6 +39,7 @@ namespace StartupsBack.Database
     }
     public class Startup
     {
+        [Key]
         public int Id { get; set; }
         
         public string Name { get; set; } = string.Empty;

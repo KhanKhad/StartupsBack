@@ -8,8 +8,12 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
         builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Filename=SqLiteDB.db"));
+
 
         var app = builder.Build();
 
@@ -29,8 +33,6 @@ internal class Program
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
-
-        //app.MapGet("/", (MainDb db) => db.UserDB.ToList());
 
         app.Run();
     }

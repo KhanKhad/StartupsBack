@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StartupsBack.Database;
 using StartupsBack.ViewModels;
+using StartupsBack.ViewModels.ActionsResults;
 
 namespace StartupsBack.Controllers
 {
@@ -16,21 +17,26 @@ namespace StartupsBack.Controllers
             _userControl = new UserControlViewModel(_logger, dbContext);
         }
 
-        public async Task<IActionResult> Index()
+        //http://localhost/profile/createuser?name=to2m&pass=dsf
+        public async Task<IActionResult> CreateUser(string name, string pass)
         {
-            var res = await _userControl.CreateUserAsync("lalka", "loks");
+            var res = await _userControl.CreateUserAsync(name, pass);
 
-            if (res.Item1 == UserCreateResult.Success)
+            switch (res.UserCreateResultType)
             {
-                return Json(res.Item2);
+                case UserCreateResultType.Success:
+                    return new JsonResult(new { Result = UserCreateResultType.Success.ToString() });
+
+                case UserCreateResultType.AlreadyExist:
+                    return new JsonResult(new { Result = UserCreateResultType.AlreadyExist.ToString() });
+
+                case UserCreateResultType.UnknownError:
+                    return new JsonResult(new { Result = UserCreateResultType.UnknownError.ToString(), Error = res.ErrorOrNull });
+                default:
+                    break;
             }
-            else return new ContentResult() { Content = "lala" };
 
-            /*var users = _dbContext.UsersDB.Include(x => x.PublishedStartups).Include(x => x.History).ToList();
-            var startups = _dbContext.StartupsDB.ToList();
-            var t = users.FirstOrDefault(i => i.Id == 1);
-
-            return Json(users);*/
+            return new ContentResult() { Content = "lala" };
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace StartupsBack.Database
 {
@@ -20,19 +22,25 @@ namespace StartupsBack.Database
                 .HasForeignKey(st => st.AuthorForeignKey)
                 .HasPrincipalKey(user => user.Id);
 
+            modelBuilder.Entity<Startup>()
+                .HasMany(st => st.Contributors)
+                .WithMany();
+
             modelBuilder.Entity<User>()
                 .HasMany(user => user.History)
                 .WithMany();
 
             modelBuilder.Entity<User>()
                 .HasMany(user => user.Projects)
-                .WithMany(st => st.Contributors);
+                .WithMany();
         }
     }
 
-    [PrimaryKey(nameof(Id), nameof(Name), nameof(Token))]
+    [Index(nameof(Name), IsUnique = true)]
+    [Index(nameof(Token), IsUnique = true)]
     public class User
     {
+        [Key]
         public int Id { get; set; }
         public string Token { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
@@ -45,9 +53,10 @@ namespace StartupsBack.Database
         public List<Startup> Projects { get; set; } = new List<Startup>();
     }
 
-    [PrimaryKey(nameof(Id), nameof(Name))]
+    [Index(nameof(Name), IsUnique = true)]
     public class Startup
     {
+        [Key]
         public int Id { get; set; }
         
         public string Name { get; set; } = string.Empty;

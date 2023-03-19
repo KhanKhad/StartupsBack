@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using StartupsBack.Controllers;
 using StartupsBack.Database;
+using StartupsBack.ViewModels.ActionsResults;
 using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,7 +19,7 @@ namespace StartupsBack.ViewModels
             _dbContext = dbContext;
         }
 
-        public async Task<(UserCreateResult, User?)> CreateUserAsync(string name, string pass)
+        public async Task<UserCreateResult> CreateUserAsync(string name, string pass)
         {
             try
             {
@@ -31,60 +32,61 @@ namespace StartupsBack.ViewModels
                 await _dbContext.UsersDB.AddAsync(user);
                 await _dbContext.SaveChangesAsync();
 
-                return (UserCreateResult.Success, user);
+                return UserCreateResult.Success(user);
             }
             catch (DbUpdateException ex)
             {
                 if (ex.InnerException is SqliteException sqEx)
                 {
-                    if (false &&( sqEx.SqliteExtendedErrorCode == 2067 || sqEx.SqliteErrorCode == 19))
+                    if (sqEx.SqliteExtendedErrorCode == 2067 || sqEx.SqliteErrorCode == 19)
                     {
-                        return (UserCreateResult.AlreadyExist, null);
+                        return UserCreateResult.AlreadyExists();
                     }
                 }
-                return (UserCreateResult.UnknownError, null);
+                return UserCreateResult.UnknownError(ex);
             }
             catch(Exception ex)
             {
-                return (UserCreateResult.UnknownError, null);
+                return UserCreateResult.UnknownError(ex);
             }
-           
         }
 
-        public async Task<(AuthenticationResult, User?)> AuthenticationAsync(string name, string pass)
+        public async Task<AuthenticationResult> AuthenticationAsync(string name, string pass)
         {
-            var passHash = await GetHashAsync(pass);
-            var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name && user.Password == passHash);
-            if (user != null) return (AuthenticationResult.Success, user);
+            try
+            {
+                var passHash = await GetHashAsync(pass);
+                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name && user.Password == passHash);
+                if (user != null)
+                {
+                    user.Token = GenerateToken();
+                    await _dbContext.SaveChangesAsync();
+                    return AuthenticationResult.Success(user);
+                }
 
-            user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
-            if(user != null) return (AuthenticationResult.WrongPassword, null);
+                user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
+                if (user != null) return AuthenticationResult.WrongPassword();
 
-            return (AuthenticationResult.WrongLogin, null);
+                return AuthenticationResult.WrongLogin();
+            }
+            catch (Exception ex) 
+            {
+                return AuthenticationResult.UnknownError(ex);
+            }
         }
 
-
+        private static string GenerateToken()
+        {
+            return Guid.NewGuid().ToString();
+        }
 
         private const string _hashKey = "To be or not to be?";
-        public static async Task<string> GetHashAsync(string input)
+        private static async Task<string> GetHashAsync(string input)
         {
             using SHA256 mySHA256 = SHA256.Create();
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(input + _hashKey));
             var byteResult = await mySHA256.ComputeHashAsync(stream);
             return Convert.ToBase64String(byteResult);
         }
-    }
-    public enum UserCreateResult
-    {
-        Success,
-        AlreadyExist,
-
-        UnknownError
-    }
-    public enum AuthenticationResult
-    {
-        Success,
-        WrongPassword,
-        WrongLogin
     }
 }

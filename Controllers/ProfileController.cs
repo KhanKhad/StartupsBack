@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StartupsBack.Database;
+using StartupsBack.JsonConverters;
+using StartupsBack.Models.JsonModels;
 using StartupsBack.ViewModels;
 using StartupsBack.ViewModels.ActionsResults;
+using System.Text.Json;
 
 namespace StartupsBack.Controllers
 {
@@ -9,34 +12,29 @@ namespace StartupsBack.Controllers
     {
         private readonly ILogger<ProfileController> _logger;
         private readonly MainDb _dbContext;
-        UserControlViewModel _userControl;
+        private readonly UserControlViewModel _userControl;
         public ProfileController(ILogger<ProfileController> logger, MainDb dbContext)
         {
             _logger = logger;
             _dbContext = dbContext;
-            _userControl = new UserControlViewModel(_logger, dbContext);
+            _userControl = new UserControlViewModel(_logger, _dbContext);
         }
 
-        //http://localhost/profile/createuser?name=to2m&pass=dsf
-        public async Task<IActionResult> CreateUser(string name, string pass)
+        //http://localhost/profile/createuser
+        [HttpPost]
+        public async Task<IActionResult> CreateUser()
         {
-            var res = await _userControl.CreateUserAsync(name, pass);
+            var jsonoptions = new JsonSerializerOptions();
+            jsonoptions.Converters.Add(new UserJsonModelConverter());
+            var userModel = await Request.ReadFromJsonAsync<UserJsonModel>(jsonoptions);
+            if (userModel == null) return BadRequest("userModel undefined");
 
-            switch (res.UserCreateResultType)
-            {
-                case UserCreateResultType.Success:
-                    return new JsonResult(new { Result = UserCreateResultType.Success.ToString() });
+            var createUserResult = await _userControl.CreateUserAsync(userModel);
 
-                case UserCreateResultType.AlreadyExist:
-                    return new JsonResult(new { Result = UserCreateResultType.AlreadyExist.ToString() });
+            var answer = new UserJsonModel(createUserResult);
+            var str = JsonSerializer.Serialize(answer, jsonoptions);
 
-                case UserCreateResultType.UnknownError:
-                    return new JsonResult(new { Result = UserCreateResultType.UnknownError.ToString(), Error = res.ErrorOrNull });
-                default:
-                    break;
-            }
-
-            return new ContentResult() { Content = "lala" };
+            return new OkObjectResult(str);
         }
     }
 }

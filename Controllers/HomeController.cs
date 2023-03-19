@@ -20,8 +20,8 @@ namespace StartupsBack.Controllers
         public async Task<IActionResult> Index()
         {
             _logger.LogInformation("Index");
-            var users = _dbContext.UsersDB.Include(x => x.PublishedStartups).Include(x => x.History).ToList();
-            var startups = _dbContext.StartupsDB.ToList();
+            var users = await _dbContext.UsersDB.Include(x => x.PublishedStartups).Include(x => x.History).ToListAsync();
+            var startups = await _dbContext.StartupsDB.ToListAsync();
             var t = users.FirstOrDefault(i => i.Id == 1);
 
             return Json(users);

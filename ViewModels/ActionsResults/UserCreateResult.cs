@@ -1,11 +1,11 @@
-﻿using StartupsBack.Database;
+﻿using StartupsBack.Models.DbModels;
 
 namespace StartupsBack.ViewModels.ActionsResults
 {
     public class UserCreateResult
     {
-        public UserCreateResultType UserCreateResultType { get; set; }
-        public User? UserOrNull { get; set; }
+        public UserCreateResultType UserCreateResultType { get; set; } = UserCreateResultType.Unknown;
+        public UserModel? UserOrNull { get; set; }
         public Exception? ErrorOrNull { get; set; }
 
         public UserCreateResult() 
@@ -13,7 +13,7 @@ namespace StartupsBack.ViewModels.ActionsResults
 
         }
 
-        public static UserCreateResult Success(User user) 
+        public static UserCreateResult Success(UserModel user) 
         {
             var res = new UserCreateResult()
             {
@@ -47,6 +47,7 @@ namespace StartupsBack.ViewModels.ActionsResults
 
     public enum UserCreateResultType
     {
+        Unknown,
         Success,
         AlreadyExist,
 

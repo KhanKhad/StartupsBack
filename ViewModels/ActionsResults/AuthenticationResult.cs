@@ -1,11 +1,11 @@
-﻿using StartupsBack.Database;
+﻿using StartupsBack.Models.DbModels;
 
 namespace StartupsBack.ViewModels.ActionsResults
 {
     public class AuthenticationResult
     {
-        public AuthenticationResultType AuthenticationResultType { get; set; }
-        public User? UserOrNull { get; set; }
+        public AuthenticationResultType AuthenticationResultType { get; set; } = AuthenticationResultType.Unknown;
+        public UserModel? UserOrNull { get; set; }
         public Exception? ErrorOrNull { get; set; }
 
         public AuthenticationResult()
@@ -13,7 +13,7 @@ namespace StartupsBack.ViewModels.ActionsResults
 
         }
 
-        public static AuthenticationResult Success(User user)
+        public static AuthenticationResult Success(UserModel user)
         {
             var res = new AuthenticationResult()
             {
@@ -59,6 +59,7 @@ namespace StartupsBack.ViewModels.ActionsResults
     }
     public enum AuthenticationResultType
     {
+        Unknown,
         Success,
         WrongPassword,
         WrongLogin,

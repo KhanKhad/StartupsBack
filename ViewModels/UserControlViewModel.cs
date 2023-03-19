@@ -1,9 +1,9 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using StartupsBack.Controllers;
 using StartupsBack.Database;
+using StartupsBack.Models.DbModels;
+using StartupsBack.Models.JsonModels;
 using StartupsBack.ViewModels.ActionsResults;
-using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -19,15 +19,15 @@ namespace StartupsBack.ViewModels
             _dbContext = dbContext;
         }
 
-        public async Task<UserCreateResult> CreateUserAsync(string name, string pass)
+        public async Task<UserCreateResult> CreateUserAsync(UserJsonModel userJsonModel)
         {
             try
             {
-                var user = new User
+                var user = new UserModel
                 {
                     AccountCreated = DateTime.UtcNow,
-                    Name = name,
-                    Password = await GetHashAsync(pass),
+                    Name = userJsonModel.Name,
+                    PasswordHash = await GetHashAsync(userJsonModel.Password),
                 };
                 await _dbContext.UsersDB.AddAsync(user);
                 await _dbContext.SaveChangesAsync();
@@ -56,18 +56,26 @@ namespace StartupsBack.ViewModels
             try
             {
                 var passHash = await GetHashAsync(pass);
-                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name && user.Password == passHash);
-                if (user != null)
+                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name && user.PasswordHash == passHash);
+                if (user == null)
                 {
-                    user.Token = GenerateToken();
+                    user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
+                    if (user != null) return AuthenticationResult.WrongPassword();
+                    return AuthenticationResult.WrongLogin();
+                }
+                else
+                {
+                    string token;
+                    do
+                    {
+                        token = GenerateToken();
+                    }
+                    while (await _dbContext.UsersDB.FirstOrDefaultAsync(x => x.Token == token) == null);
+                    
+                    user.Token = token;
                     await _dbContext.SaveChangesAsync();
                     return AuthenticationResult.Success(user);
                 }
-
-                user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
-                if (user != null) return AuthenticationResult.WrongPassword();
-
-                return AuthenticationResult.WrongLogin();
             }
             catch (Exception ex) 
             {

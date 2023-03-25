@@ -11,7 +11,10 @@ namespace StartupsBack.Database
         public MainDb(DbContextOptions<MainDb> options)
             : base(options)
         {
-            Database.EnsureCreated();   // создаем базу данных при первом обращении
+#if DEBUG
+            Database.EnsureDeleted();
+#endif
+            Database.EnsureCreated();
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

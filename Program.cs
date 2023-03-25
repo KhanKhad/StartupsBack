@@ -14,7 +14,6 @@ internal class Program
 
         builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Filename=SqLiteDB.db"));
 
-
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

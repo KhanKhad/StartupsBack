@@ -51,15 +51,15 @@ namespace StartupsBack.ViewModels
             }
         }
 
-        public async Task<AuthenticationResult> AuthenticationAsync(string name, string pass)
+        public async Task<AuthenticationResult> AuthenticationAsync(UserJsonModel userJsonModel)
         {
             try
             {
-                var passHash = await GetHashAsync(pass);
-                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name && user.PasswordHash == passHash);
+                var passHash = await GetHashAsync(userJsonModel.Password);
+                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == userJsonModel.Name && user.PasswordHash == passHash);
                 if (user == null)
                 {
-                    user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
+                    user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == userJsonModel.Name);
                     if (user != null) return AuthenticationResult.WrongPassword();
                     return AuthenticationResult.WrongLogin();
                 }
@@ -88,7 +88,7 @@ namespace StartupsBack.ViewModels
             return Guid.NewGuid().ToString();
         }
 
-        private const string _hashKey = "To be or not to be?";
+        private const string _hashKey = "How was your weekend?";
         private static async Task<string> GetHashAsync(string input)
         {
             using SHA256 mySHA256 = SHA256.Create();

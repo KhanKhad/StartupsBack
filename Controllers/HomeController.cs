@@ -15,6 +15,7 @@ namespace StartupsBack.Controllers
         {
             _logger = logger;
             _dbContext = dbContext;
+            HttpContext.Response.Cookies.Append("LastVisit", DateTime.Now.ToString("dd/MM/yyyy hh-mm-ss"));
         }
 
         public async Task<IActionResult> Index()

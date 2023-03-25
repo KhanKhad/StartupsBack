@@ -36,5 +36,19 @@ namespace StartupsBack.Controllers
 
             return new OkObjectResult(str);
         }
+        public async Task<IActionResult> Authenticate()
+        {
+            var jsonoptions = new JsonSerializerOptions();
+            jsonoptions.Converters.Add(new UserJsonModelConverter());
+            var userModel = await Request.ReadFromJsonAsync<UserJsonModel>(jsonoptions);
+            if (userModel == null) return BadRequest("userModel undefined");
+
+            var userAuthenticateResult = await _userControl.AuthenticationAsync(userModel);
+
+            var answer = new UserJsonModel(userAuthenticateResult);
+            var str = JsonSerializer.Serialize(answer, jsonoptions);
+
+            return new OkObjectResult(str);
+        }
     }
 }

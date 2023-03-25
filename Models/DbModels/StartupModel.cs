@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StartupsBack.Models.DbModels
 {
-    [Index(nameof(Name), IsUnique = true)]
     public class StartupModel
     {
         [Key]

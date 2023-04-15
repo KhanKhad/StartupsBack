@@ -17,6 +17,8 @@ namespace StartupsBack.Models.DbModels
 
         public UserModel? Author { get; set; }
 
+        public byte[] Picture { get; set; } = Array.Empty<byte>();
+
         public List<UserModel> Contributors { get; set; } = new List<UserModel>();
     }
 }

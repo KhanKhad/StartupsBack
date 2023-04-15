@@ -67,7 +67,7 @@ namespace StartupsBack.Utilities
             // property associated with this IFormFile. If a display
             // name isn't found, error messages simply won't show
             // a display name.
-            MemberInfo property =
+            MemberInfo? property =
                 typeof(T).GetProperty(
                     formFile.Name.Substring(formFile.Name.IndexOf(".",
                     StringComparison.Ordinal) + 1));
@@ -147,7 +147,7 @@ namespace StartupsBack.Utilities
         }
 
         public static async Task<byte[]> ProcessStreamedFile(
-            MultipartSection section, ContentDispositionHeaderValue contentDisposition,
+            MultipartSection section, ContentDispositionHeaderValue? contentDisposition,
             ModelStateDictionary modelState, string[] permittedExtensions, long sizeLimit)
         {
             try
@@ -168,7 +168,7 @@ namespace StartupsBack.Utilities
                         $"The file exceeds {megabyteSizeLimit:N1} MB.");
                     }
                     else if (!IsValidFileExtensionAndSignature(
-                        contentDisposition.FileName.Value, memoryStream,
+                        contentDisposition?.FileName.Value, memoryStream,
                         permittedExtensions))
                     {
                         modelState.AddModelError("File",
@@ -192,7 +192,7 @@ namespace StartupsBack.Utilities
             return Array.Empty<byte>();
         }
 
-        private static bool IsValidFileExtensionAndSignature(string fileName, Stream data, string[] permittedExtensions)
+        private static bool IsValidFileExtensionAndSignature(string? fileName, Stream data, string[] permittedExtensions)
         {
             if (string.IsNullOrEmpty(fileName) || data == null || data.Length == 0)
             {
@@ -208,63 +208,61 @@ namespace StartupsBack.Utilities
 
             data.Position = 0;
 
-            using (var reader = new BinaryReader(data))
+            var reader = new BinaryReader(data);
+            if (ext.Equals(".txt") || ext.Equals(".csv") || ext.Equals(".prn"))
             {
-                if (ext.Equals(".txt") || ext.Equals(".csv") || ext.Equals(".prn"))
+                if (_allowedChars.Length == 0)
                 {
-                    if (_allowedChars.Length == 0)
+                    // Limits characters to ASCII encoding.
+                    for (var i = 0; i < data.Length; i++)
                     {
-                        // Limits characters to ASCII encoding.
-                        for (var i = 0; i < data.Length; i++)
+                        if (reader.ReadByte() > sbyte.MaxValue)
                         {
-                            if (reader.ReadByte() > sbyte.MaxValue)
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
-                    else
+                }
+                else
+                {
+                    // Limits characters to ASCII encoding and
+                    // values of the _allowedChars array.
+                    for (var i = 0; i < data.Length; i++)
                     {
-                        // Limits characters to ASCII encoding and
-                        // values of the _allowedChars array.
-                        for (var i = 0; i < data.Length; i++)
+                        var b = reader.ReadByte();
+                        if (b > sbyte.MaxValue ||
+                            !_allowedChars.Contains(b))
                         {
-                            var b = reader.ReadByte();
-                            if (b > sbyte.MaxValue ||
-                                !_allowedChars.Contains(b))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
-
-                    return true;
                 }
 
-                // Uncomment the following code block if you must permit
-                // files whose signature isn't provided in the _fileSignature
-                // dictionary. We recommend that you add file signatures
-                // for files (when possible) for all file types you intend
-                // to allow on the system and perform the file signature
-                // check.
-                /*
-                if (!_fileSignature.ContainsKey(ext))
-                {
-                    return true;
-                }
-                */
-
-                // File signature check
-                // --------------------
-                // With the file signatures provided in the _fileSignature
-                // dictionary, the following code tests the input content's
-                // file signature.
-                var signatures = _fileSignature[ext];
-                var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
-
-                return signatures.Any(signature =>
-                    headerBytes.Take(signature.Length).SequenceEqual(signature));
+                return true;
             }
+
+            // Uncomment the following code block if you must permit
+            // files whose signature isn't provided in the _fileSignature
+            // dictionary. We recommend that you add file signatures
+            // for files (when possible) for all file types you intend
+            // to allow on the system and perform the file signature
+            // check.
+            /*
+            if (!_fileSignature.ContainsKey(ext))
+            {
+                return true;
+            }
+            */
+
+            // File signature check
+            // --------------------
+            // With the file signatures provided in the _fileSignature
+            // dictionary, the following code tests the input content's
+            // file signature.
+            var signatures = _fileSignature[ext];
+            var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
+
+            return signatures.Any(signature =>
+                headerBytes.Take(signature.Length).SequenceEqual(signature));
         }
     }
 }

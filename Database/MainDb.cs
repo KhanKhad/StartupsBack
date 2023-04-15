@@ -11,9 +11,6 @@ namespace StartupsBack.Database
         public MainDb(DbContextOptions<MainDb> options)
             : base(options)
         {
-#if DEBUG
-            Database.EnsureDeleted();
-#endif
             Database.EnsureCreated();
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

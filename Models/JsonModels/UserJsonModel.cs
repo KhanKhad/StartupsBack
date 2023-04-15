@@ -9,6 +9,7 @@ namespace StartupsBack.Models.JsonModels
         #region RequestProperties
         public string Name { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public byte[] ProfilePic { get; set; } = Array.Empty<byte>();
         #endregion
 
         public UserJsonModel(AuthenticationResult authenticationResult)

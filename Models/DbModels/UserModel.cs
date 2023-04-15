@@ -14,6 +14,8 @@ namespace StartupsBack.Models.DbModels
         public UserTypes UserType { get; set; } = UserTypes.Guest;
 
         public DateTime AccountCreated { get; set; }
+
+        public byte[] ProfilePic { get; set; } = Array.Empty<byte>();
         public List<StartupModel> PublishedStartups { get; set; } = new List<StartupModel>();
         public List<StartupModel> History { get; set; } = new List<StartupModel>();
         public List<StartupModel> Projects { get; set; } = new List<StartupModel>();

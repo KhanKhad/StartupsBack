@@ -28,6 +28,7 @@ namespace StartupsBack.ViewModels
                     AccountCreated = DateTime.UtcNow,
                     Name = userJsonModel.Name,
                     PasswordHash = await GetHashAsync(userJsonModel.Password),
+                    ProfilePic = userJsonModel.ProfilePic,
                 };
                 await _dbContext.UsersDB.AddAsync(user);
                 await _dbContext.SaveChangesAsync();
@@ -48,6 +49,19 @@ namespace StartupsBack.ViewModels
             catch(Exception ex)
             {
                 return UserCreateResult.UnknownError(ex);
+            }
+        }
+
+        public async Task<UserModel> GetUserAsync(int id)
+        {
+            try
+            {
+                var res = await _dbContext.UsersDB.FirstOrDefaultAsync();
+                return res?? new UserModel();
+            }
+            catch
+            {
+                return new UserModel();
             }
         }
 

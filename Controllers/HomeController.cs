@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 using StartupsBack.Database;
 using StartupsBack.Models;
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace StartupsBack.Controllers
 {

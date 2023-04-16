@@ -1,8 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StartupsBack.Database;
 using StartupsBack.Models.DbModels;
 using StartupsBack.Models.JsonModels;
 using StartupsBack.ViewModels.ActionsResults;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace StartupsBack.ViewModels
 {

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Net.Http.Headers;
+using System;
+using System.IO;
 
 namespace StartupsBack.Utilities
 {

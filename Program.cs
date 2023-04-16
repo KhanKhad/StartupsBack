@@ -1,5 +1,6 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
+using Microsoft.Extensions.DependencyInjection;
 using StartupsBack.Database;
 
 internal class Program
@@ -9,12 +10,11 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews()
-            .AddNewtonsoftJson(options =>
-            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+        builder.Services.AddControllersWithViews();
+           /* .AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);*/
 
-        builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Data Source=helloapp.db"));
-        //builder.Services.AddSingleton(new MongoClient("mongodb://localhost:27017"));
+        //builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Data Source=helloapp.db"));
 
         var app = builder.Build();
 

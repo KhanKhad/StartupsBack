@@ -1,11 +1,15 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StartupsBack.Database;
 using StartupsBack.Models.DbModels;
 using StartupsBack.Models.JsonModels;
 using StartupsBack.ViewModels.ActionsResults;
+using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StartupsBack.ViewModels
 {

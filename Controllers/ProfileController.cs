@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using StartupsBack.Database;
 using StartupsBack.JsonConverters;
@@ -7,7 +9,10 @@ using StartupsBack.Models.DbModels;
 using StartupsBack.Models.JsonModels;
 using StartupsBack.Utilities;
 using StartupsBack.ViewModels;
+using System;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace StartupsBack.Controllers
 {

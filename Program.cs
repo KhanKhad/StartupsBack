@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StartupsBack.Database;
@@ -10,11 +11,11 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
-           /* .AddNewtonsoftJson(options =>
-            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);*/
+        builder.Services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-        //builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Data Source=helloapp.db"));
+        builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Data Source=helloapp.db"));
 
         var app = builder.Build();
 
@@ -28,6 +29,11 @@ internal class Program
 
         //app.UseHttpsRedirection();
         app.UseStaticFiles();
+
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        });
 
         app.UseRouting();
 

@@ -14,7 +14,7 @@ internal class Program
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
         builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Data Source=helloapp.db"));
-        builder.Services.AddSingleton(new MongoClient("mongodb://localhost:27017"));
+        //builder.Services.AddSingleton(new MongoClient("mongodb://localhost:27017"));
 
         var app = builder.Build();
 

@@ -12,12 +12,10 @@ namespace StartupsBack.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly MainDb _dbContext;
-        private readonly MongoClient _dbMongo;
-        public HomeController(ILogger<HomeController> logger, MainDb dbContext, MongoClient client)
+        public HomeController(ILogger<HomeController> logger, MainDb dbContext)
         {
             _logger = logger;
             _dbContext = dbContext;
-            _dbMongo = client;
             //HttpContext.Response.Cookies.Append("LastVisit", DateTime.Now.ToString("dd/MM/yyyy hh-mm-ss"));
         }
 

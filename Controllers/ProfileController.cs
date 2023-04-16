@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using StartupsBack.Database;
 using StartupsBack.JsonConverters;
@@ -11,13 +7,6 @@ using StartupsBack.Models.DbModels;
 using StartupsBack.Models.JsonModels;
 using StartupsBack.Utilities;
 using StartupsBack.ViewModels;
-using StartupsBack.ViewModels.ActionsResults;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO.Compression;
-using System.Net;
 using System.Text.Json;
 
 namespace StartupsBack.Controllers
@@ -80,7 +69,7 @@ namespace StartupsBack.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userModel = new UserJsonModel();
+            var userModel = new UserModel();
 
             var boundary = MultipartRequestHelper.GetBoundary(
                 MediaTypeHeaderValue.Parse(Request.ContentType), _fileSizeLimit);
@@ -111,7 +100,7 @@ namespace StartupsBack.Controllers
                         else if(contentDisposition?.Name == "password")
                         {
                             var val = await section.ReadAsStringAsync();
-                            userModel.Password = val;
+                            userModel.PasswordHash = await UserControlViewModel.GetHashAsync(val);
                         }
                         else
                         {
@@ -141,9 +130,7 @@ namespace StartupsBack.Controllers
 
             var createUserResult = await _userControl.CreateUserAsync(userModel);
 
-            var answer = new UserJsonModel(createUserResult);
-
-            return Ok();
+            return Json(new { Result = createUserResult.UserCreateResultType, Token = createUserResult.UserOrNull?.Token ?? string.Empty });
         }
 
         public async Task Download()

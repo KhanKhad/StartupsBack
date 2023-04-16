@@ -28,6 +28,19 @@ namespace StartupsBack.Controllers
             return Json(users);
         }
 
+
+        public async Task<IActionResult> Users()
+        {
+            var users = await _dbContext.UsersDB.ToListAsync();
+            return Json(users);
+        }
+
+        public async Task<IActionResult> Startups()
+        {
+            var startups = await _dbContext.StartupsDB.ToListAsync();
+            return Json(startups);
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

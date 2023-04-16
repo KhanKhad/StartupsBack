@@ -52,6 +52,32 @@ namespace StartupsBack.ViewModels
             }
         }
 
+        public async Task<UserCreateResult> CreateUserAsync(UserModel userModel)
+        {
+            try
+            {
+                await _dbContext.UsersDB.AddAsync(userModel);
+                await _dbContext.SaveChangesAsync();
+
+                return UserCreateResult.Success(userModel);
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException is SqliteException sqEx)
+                {
+                    if (sqEx.SqliteExtendedErrorCode == 2067 || sqEx.SqliteErrorCode == 19)
+                    {
+                        return UserCreateResult.AlreadyExists();
+                    }
+                }
+                return UserCreateResult.UnknownError(ex);
+            }
+            catch (Exception ex)
+            {
+                return UserCreateResult.UnknownError(ex);
+            }
+        }
+
         public async Task<UserModel> GetUserAsync(int id)
         {
             try
@@ -103,7 +129,7 @@ namespace StartupsBack.ViewModels
         }
 
         private const string _hashKey = "How was your weekend?";
-        private static async Task<string> GetHashAsync(string input)
+        public static async Task<string> GetHashAsync(string input)
         {
             using SHA256 mySHA256 = SHA256.Create();
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(input + _hashKey));

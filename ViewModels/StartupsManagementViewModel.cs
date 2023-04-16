@@ -48,5 +48,31 @@ namespace StartupsBack.ViewModels
                 return StartupCreateResult.UnknownError(ex);
             }
         }
+        public async Task<StartupCreateResult> CreateStartupAsync(StartupModel startup, string authorTken)
+        {
+            try
+            {
+                var author = await _dbContext.UsersDB.Include(user => user.PublishedStartups)
+                    .FirstOrDefaultAsync(user => user.Token == authorTken);
+
+                if (author == null)
+                    return StartupCreateResult.AuthenticationFailed();
+
+                if (author.PublishedStartups.FirstOrDefault(st => st.Name == startup.Name) != null)
+                    return StartupCreateResult.AlreadyExists();
+
+                startup.Contributors.Add(author);
+
+                var res = await _dbContext.StartupsDB.AddAsync(startup);
+                await _dbContext.SaveChangesAsync();
+                startup.Id = res.Entity.Id;
+
+                return StartupCreateResult.Success(startup);
+            }
+            catch (Exception ex)
+            {
+                return StartupCreateResult.UnknownError(ex);
+            }
+        }
     }
 }

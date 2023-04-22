@@ -15,7 +15,7 @@ internal class Program
             .AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-        builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Data Source=helloapp.db"));
+        builder.Services.AddDbContext<MainDb>(options => options.UseSqlite("Filename=SqLiteDB.db"));
 
         var app = builder.Build();
 

@@ -63,7 +63,7 @@ namespace StartupsBack.Controllers
             return new OkObjectResult(str);
         }
 
-        public async Task<IActionResult> Upload()
+        public async Task<IActionResult> Create()
         {
             if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,9 @@ using StartupsBack.Models.JsonModels;
 using StartupsBack.Utilities;
 using StartupsBack.ViewModels;
 using System;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -28,7 +31,7 @@ namespace StartupsBack.Controllers
         {
             _logger = logger;
             _dbContext = dbContext;
-            _fileSizeLimit = 64000;
+            _fileSizeLimit = 1048576 * 3;
             _userControl = new UserControlViewModel(_logger, _dbContext);
         }
 
@@ -55,7 +58,7 @@ namespace StartupsBack.Controllers
             var userModel = await Request.ReadFromJsonAsync<UserJsonModel>(jsonoptions);
             if (userModel == null) return BadRequest("userModel undefined");
 
-            var userAuthenticateResult = await _userControl.AuthenticationAsync(userModel);
+            var userAuthenticateResult = await _userControl.AuthenticationAsync(userModel.Name, userModel.Password);
 
             var answer = new UserJsonModel(userAuthenticateResult);
             var str = JsonSerializer.Serialize(answer, jsonoptions);
@@ -63,82 +66,48 @@ namespace StartupsBack.Controllers
             return new OkObjectResult(str);
         }
 
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> CreateUserFromMultipart()
         {
-            if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
+            var userParseResult = await MultipartRequestHelper.GetUserModelFromMultipart(Request, ModelState, _permittedExtensions, _fileSizeLimit);
+
+            if (userParseResult.UserOrNull == null)
             {
-                ModelState.AddModelError("File",
-                    $"The request couldn't be processed (Error 1).");
-                // Log error
-
-                return BadRequest(ModelState);
-            }
-
-            var userModel = new UserModel();
-
-            var boundary = MultipartRequestHelper.GetBoundary(
-                MediaTypeHeaderValue.Parse(Request.ContentType), _fileSizeLimit);
-
-            var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-            var section = await reader.ReadNextSectionAsync();
-
-            while (section != null)
-            {
-                var hasContentDispositionHeader =
-                    ContentDispositionHeaderValue.TryParse(
-                        section.ContentDisposition, out var contentDisposition);
-
-                if (hasContentDispositionHeader)
+                if(userParseResult.UserParseResultType == ViewModels.ActionsResults.UserParseResultType.BadModel)
                 {
-                    // This check assumes that there's a file
-                    // present without form data. If form data
-                    // is present, this method immediately fails
-                    // and returns the model error.
-                    if (!MultipartRequestHelper
-                        .HasFileContentDisposition(contentDisposition))
-                    {
-                        if(contentDisposition?.Name == "username")
-                        {
-                            var val = await section.ReadAsStringAsync();
-                            userModel.Name = val;
-                        }
-                        else if(contentDisposition?.Name == "password")
-                        {
-                            var val = await section.ReadAsStringAsync();
-                            userModel.PasswordHash = await UserControlViewModel.GetHashAsync(val);
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("File",
-                             $"The request couldn't be processed (Error 2).");
-                        }
-                    }
-                    else
-                    {
-                        var streamedFileContent = await FileHelpers.ProcessStreamedFile(
-                            section, contentDisposition, ModelState,
-                            _permittedExtensions, _fileSizeLimit);
+                    var sb = new StringBuilder();
+                    sb.AppendJoin(Environment.NewLine, ModelState.Values.SelectMany(v => v.Errors)
+                                                           .Select(v => v.ErrorMessage + " " + v.Exception));
 
-                        userModel.ProfilePic = streamedFileContent;
-                    }
+                    return BadRequest(new { UserParseResult = userParseResult.UserParseResultType.ToString(), ErrorOrEmpty = sb.ToString() });
                 }
+                else
+                    return BadRequest(new { UserParseResult = userParseResult.UserParseResultType.ToString(), ErrorOrEmpty = userParseResult.ErrorOrNull == null ? string.Empty : userParseResult.ErrorOrNull.Message });
 
-                // Drain any remaining section body that hasn't been consumed and
-                // read the headers for the next section.
-                section = await reader.ReadNextSectionAsync();
             }
 
-            if (false && !ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var createUserResult = await _userControl.CreateUserAsync(userParseResult.UserOrNull);
 
-            var createUserResult = await _userControl.CreateUserAsync(userModel);
-
-            return Json(new { Result = createUserResult.UserCreateResultType, Token = createUserResult.UserOrNull?.Token ?? string.Empty });
+            return Json(new { Result = createUserResult.UserCreateResultType.ToString(), Token = createUserResult.UserOrNull?.Token ?? string.Empty });
         }
 
-        public async Task Download()
+        public async Task<IActionResult> AutenticateAndGetMultipart(string name, string password)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(password))
+            {
+                return BadRequest("name or password is empty");
+            }
+
+            var userAuthenticateResult = await _userControl.AuthenticationAsync(name, password);
+
+            if (userAuthenticateResult.UserOrNull == null)
+            {
+                return BadRequest(new { Result = userAuthenticateResult.AuthenticationResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
+            }
+
+            return new MultiformActionResult(userAuthenticateResult.UserOrNull, true, true);
+        }
+
+        /*public async Task Download()
         {
             var res = await _userControl.GetUserAsync(1);
             string formDataBoundary = String.Format("----------{0:N}", DateTime.Now.Ticks.ToString("x"));
@@ -156,6 +125,6 @@ namespace StartupsBack.Controllers
             formData.Add(new StringContent(user.Name), "username");
             formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), "profile_pic", "free.png");
             return formData;
-        }
+        }*/
     }
 }

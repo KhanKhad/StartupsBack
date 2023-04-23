@@ -15,6 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "useSSL": false,
+      "httpPort": 80,
       "dotnetRunMessages": true
     }
   }

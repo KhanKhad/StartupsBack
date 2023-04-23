@@ -26,7 +26,7 @@ namespace StartupsBack.Controllers
         {
             _logger = logger;
             _dbContext = dbContext;
-            _fileSizeLimit = 64000;
+            _fileSizeLimit = 1048576 * 3;
             _startupsManager = new StartupsManagementViewModel(_logger, _dbContext);
         }
         [HttpPost]

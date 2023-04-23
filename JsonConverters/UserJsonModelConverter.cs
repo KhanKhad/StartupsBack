@@ -17,12 +17,12 @@ namespace StartupsBack.JsonConverters
                 {
                     var propertyName = reader.GetString();
                     reader.Read();
-                    switch (propertyName)
+                    switch (propertyName?.ToLower())
                     {
-                        case "Name" or "name" when reader.TokenType == JsonTokenType.String:
+                        case JsonConstants.UserName when reader.TokenType == JsonTokenType.String:
                             name = reader.GetString();
                             break;
-                        case "Password" or "password" when reader.TokenType == JsonTokenType.String:
+                        case JsonConstants.UserPassword when reader.TokenType == JsonTokenType.String:
                             pass = reader.GetString();
                             break;
                     }
@@ -44,7 +44,7 @@ namespace StartupsBack.JsonConverters
 
             writer.WriteString("UserCreateResult", user.UserCreateResult.ToString());
             writer.WriteString("AuthenticationResult", user.AuthenticationResult.ToString());
-            writer.WriteString("Token", user.Token);
+            writer.WriteString(JsonConstants.UserToken, user.Token);
             writer.WriteString("ErrorOrEmpty", user.ErrorOrEmpty);
 
             writer.WriteEndObject();

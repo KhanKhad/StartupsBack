@@ -25,45 +25,24 @@ namespace StartupsBack.ViewModels
 
         public async Task<UserCreateResult> CreateUserAsync(UserJsonModel userJsonModel)
         {
-            try
+            var user = new UserModel
             {
-                var user = new UserModel
-                {
-                    AccountCreated = DateTime.UtcNow,
-                    Name = userJsonModel.Name,
-                    PasswordHash = await GetHashAsync(userJsonModel.Password),
-                    ProfilePic = userJsonModel.ProfilePic,
-                };
-                await _dbContext.UsersDB.AddAsync(user);
-                await _dbContext.SaveChangesAsync();
-
-                return UserCreateResult.Success(user);
-            }
-            catch (DbUpdateException ex)
-            {
-                if (ex.InnerException is SqliteException sqEx)
-                {
-                    if (sqEx.SqliteExtendedErrorCode == 2067 || sqEx.SqliteErrorCode == 19)
-                    {
-                        return UserCreateResult.AlreadyExists();
-                    }
-                }
-                return UserCreateResult.UnknownError(ex);
-            }
-            catch(Exception ex)
-            {
-                return UserCreateResult.UnknownError(ex);
-            }
+                AccountCreated = DateTime.UtcNow,
+                Name = userJsonModel.Name,
+                PasswordHash = userJsonModel.Password,
+                ProfilePic = userJsonModel.ProfilePic,
+            };
+            return await CreateUserAsync(user);
         }
 
         public async Task<UserCreateResult> CreateUserAsync(UserModel userModel)
         {
             try
             {
-                await _dbContext.UsersDB.AddAsync(userModel);
+                userModel.PasswordHash = await GetHashAsync(userModel.PasswordHash);
+                var user = await _dbContext.UsersDB.AddAsync(userModel);
                 await _dbContext.SaveChangesAsync();
-
-                return UserCreateResult.Success(userModel);
+                return UserCreateResult.Success(user.Entity);
             }
             catch (DbUpdateException ex)
             {
@@ -82,28 +61,16 @@ namespace StartupsBack.ViewModels
             }
         }
 
-        public async Task<UserModel> GetUserAsync(int id)
+        public async Task<AuthenticationResult> AuthenticationAsync(string name, string password)
         {
             try
             {
-                var res = await _dbContext.UsersDB.FirstOrDefaultAsync();
-                return res?? new UserModel();
-            }
-            catch
-            {
-                return new UserModel();
-            }
-        }
+                var passHash = await GetHashAsync(password);
+                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(i => i.Name == name && i.PasswordHash == passHash);
 
-        public async Task<AuthenticationResult> AuthenticationAsync(UserJsonModel userJsonModel)
-        {
-            try
-            {
-                var passHash = await GetHashAsync(userJsonModel.Password);
-                var user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == userJsonModel.Name && user.PasswordHash == passHash);
                 if (user == null)
                 {
-                    user = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == userJsonModel.Name);
+                    user = await _dbContext.UsersDB.FirstOrDefaultAsync(i => i.Name == name);
                     if (user != null) return AuthenticationResult.WrongPassword();
                     return AuthenticationResult.WrongLogin();
                 }
@@ -114,14 +81,14 @@ namespace StartupsBack.ViewModels
                     {
                         token = GenerateToken();
                     }
-                    while (await _dbContext.UsersDB.FirstOrDefaultAsync(x => x.Token == token) == null);
-                    
+                    while (await _dbContext.UsersDB.FirstOrDefaultAsync(x => x.Token == token) != null);
+
                     user.Token = token;
                     await _dbContext.SaveChangesAsync();
                     return AuthenticationResult.Success(user);
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return AuthenticationResult.UnknownError(ex);
             }

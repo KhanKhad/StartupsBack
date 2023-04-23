@@ -91,7 +91,7 @@ namespace StartupsBack.Utilities
                             var streamedFileContent = await FileHelpers.ProcessStreamedFile(
                                 section, contentDisposition, modelState,
                                 permittedExtensions, fileSizeLimit);
-
+                            userModel.ProfilePicFileName = contentDisposition?.FileName.Value ?? string.Empty;
                             userModel.ProfilePic = streamedFileContent;
                         }
                     }
@@ -125,7 +125,7 @@ namespace StartupsBack.Utilities
             if (needPic)
             {
                 var file_bytes = userModel.ProfilePic;
-                formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), JsonConstants.UserPicturePropertyName, JsonConstants.UserPictureFileName);
+                formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), JsonConstants.UserPicturePropertyName, userModel.ProfilePicFileName);
             }
 
             return Task.FromResult(formData);

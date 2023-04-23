@@ -18,6 +18,7 @@ namespace StartupsBack.Models.DbModels
         public DateTime AccountCreated { get; set; }
 
         public byte[] ProfilePic { get; set; } = Array.Empty<byte>();
+        public string ProfilePicFileName { get; set; } = string.Empty;
         public List<StartupModel> PublishedStartups { get; set; } = new List<StartupModel>();
         public List<StartupModel> History { get; set; } = new List<StartupModel>();
         public List<StartupModel> Projects { get; set; } = new List<StartupModel>();

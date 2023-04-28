@@ -35,6 +35,17 @@ namespace StartupsBack.ViewModels.ActionsResults
             return res;
         }
 
+        public static StartupCreateResult AuthorNotFound()
+        {
+            var res = new StartupCreateResult()
+            {
+                ErrorOrNull = null,
+                StartupCreateResultType = StartupCreateResultType.AuthorNotFound,
+                StartupOrNull = null
+            };
+            return res;
+        }
+
         public static StartupCreateResult AuthenticationFailed()
         {
             var res = new StartupCreateResult()
@@ -64,6 +75,7 @@ namespace StartupsBack.ViewModels.ActionsResults
         Success,
         AlreadyExist,
         AuthenticationFailed,
+        AuthorNotFound,
 
         UnknownError
     }

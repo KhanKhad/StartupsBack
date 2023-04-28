@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,7 +19,9 @@ namespace StartupsBack.Models.DbModels
 
         public UserModel? Author { get; set; }
 
+        [JsonIgnore]
         public byte[] Picture { get; set; } = Array.Empty<byte>();
+        public string StartupPicFileName { get; set; } = string.Empty;
         public string Viewers { get; set; } = string.Empty;
         public DateTime LastModify { get; set; }
 

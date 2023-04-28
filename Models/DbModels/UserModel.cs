@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,8 @@ namespace StartupsBack.Models.DbModels
         public UserTypes UserType { get; set; } = UserTypes.Guest;
 
         public DateTime AccountCreated { get; set; }
-
+        
+        [JsonIgnore]
         public byte[] ProfilePic { get; set; } = Array.Empty<byte>();
         public string ProfilePicFileName { get; set; } = string.Empty;
         public List<StartupModel> PublishedStartups { get; set; } = new List<StartupModel>();

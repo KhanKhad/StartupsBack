@@ -12,7 +12,8 @@ namespace StartupsBack.JsonConverters
         {
             string? name = null;
             string? description = null;
-            string? authorToken = null;
+            string? authorName = null;
+            string? hash = null;
             while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
@@ -21,27 +22,32 @@ namespace StartupsBack.JsonConverters
                     reader.Read();
                     switch (propertyName?.ToLower())
                     {
-                        case "name" when reader.TokenType == JsonTokenType.String:
+                        case JsonConstants.StartupName when reader.TokenType == JsonTokenType.String:
                             name = reader.GetString();
                             break;
-                        case "authortoken" when reader.TokenType == JsonTokenType.String:
-                            authorToken = reader.GetString();
+                        case JsonConstants.StartupAuthorName when reader.TokenType == JsonTokenType.String:
+                            authorName = reader.GetString();
                             break;
-                        case "description" when reader.TokenType == JsonTokenType.String:
+                        case JsonConstants.StartupDescription when reader.TokenType == JsonTokenType.String:
                             description = reader.GetString();
+                            break;
+                        case JsonConstants.StartupHash when reader.TokenType == JsonTokenType.String:
+                            hash = reader.GetString();
                             break;
                     }
                 }
             }
             name ??= string.Empty;
-            authorToken ??= string.Empty;
+            authorName ??= string.Empty;
             description ??= string.Empty;
+            hash ??= string.Empty;
 
             return new StartupJsonModel()
             {
                 Name = name,
                 Description = description,
-                AuthorToken = authorToken,
+                AuthorName = authorName,
+                Hash = hash
             };
         }
 

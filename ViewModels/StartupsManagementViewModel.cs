@@ -5,7 +5,10 @@ using StartupsBack.Models.DbModels;
 using StartupsBack.Models.JsonModels;
 using StartupsBack.ViewModels.ActionsResults;
 using System;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace StartupsBack.ViewModels
@@ -23,43 +26,32 @@ namespace StartupsBack.ViewModels
         {
             try
             {
-                var author = await _dbContext.UsersDB.Include(user => user.PublishedStartups)
-                    .FirstOrDefaultAsync(user => user.Token == startupJsonModel.AuthorToken);
-                
-                if(author == null) 
-                    return StartupCreateResult.AuthenticationFailed();
-
-                if(author.PublishedStartups.FirstOrDefault(st=>st.Name == startupJsonModel.Name)!= null)
-                    return StartupCreateResult.AlreadyExists();
-
                 var startup = new StartupModel
                 {
-                    Author = author,
                     Name = startupJsonModel.Name,
                     Description = startupJsonModel.Description,
-                    StartupPublished = DateTime.UtcNow,
                 };
-                startup.Contributors.Add(author);
 
-                var res = await _dbContext.StartupsDB.AddAsync(startup);
-                await _dbContext.SaveChangesAsync();
-                startup.Id = res.Entity.Id;
-
-                return StartupCreateResult.Success(startup);
+                return await CreateStartupAsync(startup, startupJsonModel.AuthorName, startupJsonModel.Hash);
             }
             catch (Exception ex)
             {
                 return StartupCreateResult.UnknownError(ex);
             }
         }
-        public async Task<StartupCreateResult> CreateStartupAsync(StartupModel startup, string authorTken)
+        public async Task<StartupCreateResult> CreateStartupAsync(StartupModel startup, string authorName, string hash)
         {
             try
             {
                 var author = await _dbContext.UsersDB.Include(user => user.PublishedStartups)
-                    .FirstOrDefaultAsync(user => user.Token == authorTken);
+                    .FirstOrDefaultAsync(user => user.Name == authorName);
 
                 if (author == null)
+                    return StartupCreateResult.AuthorNotFound();
+
+                var myHash = await CalculateHash(authorName, author.Token);
+
+                if(myHash != hash)
                     return StartupCreateResult.AuthenticationFailed();
 
                 if (author.PublishedStartups.FirstOrDefault(st => st.Name == startup.Name) != null)
@@ -69,14 +61,23 @@ namespace StartupsBack.ViewModels
 
                 var res = await _dbContext.StartupsDB.AddAsync(startup);
                 await _dbContext.SaveChangesAsync();
-                startup.Id = res.Entity.Id;
 
-                return StartupCreateResult.Success(startup);
+                return StartupCreateResult.Success(res.Entity);
             }
             catch (Exception ex)
             {
                 return StartupCreateResult.UnknownError(ex);
             }
+        }
+
+
+        private const string _hashKey = "It's my startup!";
+        private async Task<string> CalculateHash(string authorName, string authorToken)
+        {
+            using SHA256 mySHA256 = SHA256.Create();
+            var stream = new MemoryStream(Encoding.ASCII.GetBytes(authorName + authorToken + _hashKey));
+            var byteResult = await mySHA256.ComputeHashAsync(stream);
+            return Convert.ToBase64String(byteResult);
         }
     }
 }

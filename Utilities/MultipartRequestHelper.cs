@@ -131,6 +131,99 @@ namespace StartupsBack.Utilities
             return Task.FromResult(formData);
         }
 
+        public static async Task<StartupParseResult> GetStartupModelFromMultipart(HttpRequest httpRequest, ModelStateDictionary modelState,
+            string[] permittedExtensions, long fileSizeLimit)
+        {
+            try
+            {
+                if (!IsMultipartContentType(httpRequest.ContentType))
+                {
+                    modelState.AddModelError("File",
+                        $"The request couldn't be processed (Error 1).");
+
+                    return StartupParseResult.NotMultipart();
+                }
+
+                var startupModel = new StartupModel();
+                var authorName = string.Empty;
+                var startupHash = string.Empty;
+                
+
+                var boundary = GetBoundary(
+                    MediaTypeHeaderValue.Parse(httpRequest.ContentType), fileSizeLimit);
+
+                var reader = new MultipartReader(boundary, httpRequest.Body);
+                var section = await reader.ReadNextSectionAsync();
+
+                while (section != null)
+                {
+                    var hasContentDispositionHeader =
+                        ContentDispositionHeaderValue.TryParse(
+                            section.ContentDisposition, out var contentDisposition);
+
+                    if (hasContentDispositionHeader)
+                    {
+                        // This check assumes that there's a file
+                        // present without form data. If form data
+                        // is present, this method immediately fails
+                        // and returns the model error.
+                        if (!HasFileContentDisposition(contentDisposition))
+                        {
+                            if (contentDisposition?.Name == JsonConstants.StartupName)
+                            {
+                                var val = await section.ReadAsStringAsync();
+                                startupModel.Name = val;
+                            }
+                            else if (contentDisposition?.Name == JsonConstants.StartupDescription)
+                            {
+                                var val = await section.ReadAsStringAsync();
+                                startupModel.Description = val;
+                            }
+                            else if (contentDisposition?.Name == JsonConstants.StartupAuthorName)
+                            {
+                                var val = await section.ReadAsStringAsync();
+                                authorName = val;
+                            }
+                            else if (contentDisposition?.Name == JsonConstants.StartupHash)
+                            {
+                                var val = await section.ReadAsStringAsync();
+                                startupHash = val;
+                            }
+                            else
+                            {
+                                /*modelState.AddModelError("File",
+                                 $"The request couldn't be processed (Error 2).");*/
+                            }
+                        }
+                        else
+                        {
+                            var streamedFileContent = await FileHelpers.ProcessStreamedFile(
+                                section, contentDisposition, modelState,
+                                permittedExtensions, fileSizeLimit);
+                            startupModel.StartupPicFileName = contentDisposition?.FileName.Value ?? string.Empty;
+                            startupModel.Picture = streamedFileContent;
+                        }
+                    }
+
+                    // Drain any remaining section body that hasn't been consumed and
+                    // read the headers for the next section.
+                    section = await reader.ReadNextSectionAsync();
+                }
+
+                if (!modelState.IsValid)
+                {
+                    return StartupParseResult.BadModel();
+                }
+
+                return StartupParseResult.Success(startupModel, authorName, startupHash);
+            }
+            catch (Exception ex)
+            {
+                return StartupParseResult.UnknownError(ex);
+            }
+        }
+
+
         public static bool IsMultipartContentType(string? contentType)
         {
             return !string.IsNullOrEmpty(contentType)

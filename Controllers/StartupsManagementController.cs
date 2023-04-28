@@ -12,6 +12,9 @@ using Microsoft.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Text;
+using StartupsBack.ViewModels.ActionsResults;
 
 namespace StartupsBack.Controllers
 {
@@ -44,85 +47,30 @@ namespace StartupsBack.Controllers
 
             return new OkObjectResult(str);
         }
+
         [HttpPost]
-        public async Task<IActionResult> CreateStartupVer2()
+        public async Task<IActionResult> CreateStartupFromMultiform()
         {
-            if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
+            var startupParseResult = await MultipartRequestHelper.GetStartupModelFromMultipart(Request, ModelState, _permittedExtensions, _fileSizeLimit);
+
+            if (startupParseResult.StartupOrNull == null)
             {
-                ModelState.AddModelError("File",
-                    $"The request couldn't be processed (Error 1).");
-                // Log error
-
-                return BadRequest(ModelState);
-            }
-
-            var startupModel = new StartupModel();
-            string authorToken = string.Empty;
-
-            var boundary = MultipartRequestHelper.GetBoundary(
-                MediaTypeHeaderValue.Parse(Request.ContentType), _fileSizeLimit);
-
-            var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-            var section = await reader.ReadNextSectionAsync();
-
-            while (section != null)
-            {
-                var hasContentDispositionHeader =
-                    ContentDispositionHeaderValue.TryParse(
-                        section.ContentDisposition, out var contentDisposition);
-
-                if (hasContentDispositionHeader)
+                if (startupParseResult.StartupParseResultType == StartupParseResultType.BadModel)
                 {
-                    // This check assumes that there's a file
-                    // present without form data. If form data
-                    // is present, this method immediately fails
-                    // and returns the model error.
-                    if (!MultipartRequestHelper
-                        .HasFileContentDisposition(contentDisposition))
-                    {
-                        if (contentDisposition?.Name == "name")
-                        {
-                            var val = await section.ReadAsStringAsync();
-                            startupModel.Name = val;
-                        }
-                        else if (contentDisposition?.Name == "authortoken")
-                        {
-                            var val = await section.ReadAsStringAsync();
-                            authorToken = val;
-                        }
-                        else if (contentDisposition?.Name == "description")
-                        {
-                            var val = await section.ReadAsStringAsync();
-                            startupModel.Description = val;
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("File",
-                             $"The request couldn't be processed (Error 2).");
-                        }
-                    }
-                    else
-                    {
-                        var streamedFileContent = await FileHelpers.ProcessStreamedFile(
-                            section, contentDisposition, ModelState,
-                            _permittedExtensions, _fileSizeLimit);
+                    var sb = new StringBuilder();
+                    sb.AppendJoin(Environment.NewLine, ModelState.Values.SelectMany(v => v.Errors)
+                                                           .Select(v => v.ErrorMessage + " " + v.Exception));
 
-                        startupModel.Picture = streamedFileContent;
-                    }
+                    return BadRequest(new { UserParseResult = startupParseResult.StartupParseResultType.ToString(), ErrorOrEmpty = sb.ToString() });
                 }
+                else
+                    return BadRequest(new { UserParseResult = startupParseResult.StartupParseResultType.ToString(), ErrorOrEmpty = startupParseResult.ErrorOrNull == null ? string.Empty : startupParseResult.ErrorOrNull.Message });
 
-                section = await reader.ReadNextSectionAsync();
             }
 
-            if (false && !ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var createStartupResult = await _startupsManager.CreateStartupAsync(startupParseResult.StartupOrNull, startupParseResult.AuthorNameOrEmpty, startupParseResult.StartupHash);
 
-            startupModel.StartupPublished = DateTime.UtcNow;
-            var createStartupResult = await _startupsManager.CreateStartupAsync(startupModel, authorToken);
-
-            return Json(new { Result = createStartupResult.StartupCreateResultType });            
+            return Json(new { Result = createStartupResult.StartupCreateResultType.ToString()});
         }
     }
 }

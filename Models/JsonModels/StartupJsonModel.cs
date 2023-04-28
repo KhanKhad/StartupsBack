@@ -5,7 +5,8 @@ namespace StartupsBack.Models.JsonModels
     public class StartupJsonModel
     {
         #region RequestProperties
-        public string AuthorToken { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
+        public string Hash { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         #endregion

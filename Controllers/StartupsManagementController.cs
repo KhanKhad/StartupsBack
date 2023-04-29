@@ -70,7 +70,7 @@ namespace StartupsBack.Controllers
 
             var createStartupResult = await _startupsManager.CreateStartupAsync(startupParseResult.StartupOrNull, startupParseResult.AuthorNameOrEmpty, startupParseResult.StartupHash);
 
-            return Json(new { Result = createStartupResult.StartupCreateResultType.ToString()});
+            return Json(new { Result = createStartupResult.StartupCreateResultType.ToString(), ErrorOrEmpty = createStartupResult.ErrorOrNull == null ? string.Empty : createStartupResult.ErrorOrNull.Message });
         }
     }
 }

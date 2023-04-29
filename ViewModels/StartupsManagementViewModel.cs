@@ -57,6 +57,7 @@ namespace StartupsBack.ViewModels
                 if (author.PublishedStartups.FirstOrDefault(st => st.Name == startup.Name) != null)
                     return StartupCreateResult.AlreadyExists();
 
+                startup.Author = author;
                 startup.Contributors.Add(author);
 
                 var res = await _dbContext.StartupsDB.AddAsync(startup);

@@ -17,7 +17,7 @@ namespace StartupsBack.Models.DbModels
         public UserTypes UserType { get; set; } = UserTypes.Guest;
 
         public DateTime AccountCreated { get; set; }
-        
+
         [JsonIgnore]
         public byte[] ProfilePic { get; set; } = Array.Empty<byte>();
         public string ProfilePicFileName { get; set; } = string.Empty;

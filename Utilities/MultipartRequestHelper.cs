@@ -245,7 +245,7 @@ namespace StartupsBack.Utilities
             }
 
             var file_bytes = startupModel.Picture;
-            formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), JsonConstants.StartupPictureFileName, startupModel.StartupPicFileName);
+            formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), JsonConstants.StartupPicturePropertyName, startupModel.StartupPicFileName);
 
             return Task.FromResult(formData);
         }

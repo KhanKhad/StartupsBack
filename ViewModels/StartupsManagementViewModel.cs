@@ -63,6 +63,9 @@ namespace StartupsBack.ViewModels
                 var res = await _dbContext.StartupsDB.AddAsync(startup);
                 await _dbContext.SaveChangesAsync();
 
+                res.Entity.StartupPicFileName = $"id#{res.Entity.Id}_{startup.StartupPicFileName}";
+                await _dbContext.SaveChangesAsync();
+
                 return StartupCreateResult.Success(res.Entity);
             }
             catch (Exception ex)

@@ -71,6 +71,18 @@ namespace StartupsBack.ViewModels
             }
         }
 
+        public async Task<int[]> GetStartupsIds(int pageNumber, int pageSize)
+        {
+            var ids = await _dbContext.StartupsDB.Select(i=>i.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToArrayAsync();
+            return ids;
+        }
+
+        public async Task<StartupModel?> GetStartupModelAsync(int id)
+        {
+            var startup = await _dbContext.StartupsDB.FirstOrDefaultAsync(startup => startup.Id == id);
+            return startup;
+        }
+
 
         private const string _hashKey = "It's my startup!";
         private async Task<string> CalculateHash(string authorName, string authorToken)

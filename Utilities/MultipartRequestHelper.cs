@@ -8,7 +8,9 @@ using StartupsBack.ViewModels;
 using StartupsBack.ViewModels.ActionsResults;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace StartupsBack.Utilities
@@ -113,16 +115,18 @@ namespace StartupsBack.Utilities
                 return UserParseResult.UnknownError(ex);
             }
         }
-        public static Task<MultipartFormDataContent> UserModelToMultipart(string formDataBoundary, UserModel userModel, bool needPic, bool myProfile)
+        public static Task<MultipartFormDataContent> UserModelToMultipart(string formDataBoundary, UserModel? userModel, bool isMine, bool needFull)
         {
+            if (userModel == null) throw new NullReferenceException(nameof(userModel));
+
             var formData = new MultipartFormDataContent(formDataBoundary);
 
-            if (myProfile)
+            if (isMine)
                 formData.Add(new StringContent(userModel.Token), JsonConstants.UserToken);
 
             formData.Add(new StringContent(userModel.Name), JsonConstants.UserName);
 
-            if (needPic)
+            if (needFull)
             {
                 var file_bytes = userModel.ProfilePic;
                 formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), JsonConstants.UserPicturePropertyName, userModel.ProfilePicFileName);
@@ -223,6 +227,28 @@ namespace StartupsBack.Utilities
             }
         }
 
+        public static Task<MultipartFormDataContent> StartupModelToMultipart(string formDataBoundary, StartupModel? startupModel, bool isMine, bool needFull)
+        {
+            if(startupModel == null) throw new NullReferenceException(nameof(startupModel));
+
+            var formData = new MultipartFormDataContent(formDataBoundary);
+
+            formData.Add(new StringContent(startupModel.Id.ToString()), JsonConstants.StartupId);
+            formData.Add(new StringContent(startupModel.Name), JsonConstants.StartupName);
+            formData.Add(new StringContent(startupModel.Description), JsonConstants.StartupDescription);
+            
+            if(needFull)
+            {
+                var sb = new StringBuilder();
+                sb.AppendJoin(',', startupModel.Contributors.Select(i => i.Id));
+                formData.Add(new StringContent(sb.ToString()), JsonConstants.StartupContributorsIds);
+            }
+
+            var file_bytes = startupModel.Picture;
+            formData.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), JsonConstants.StartupPictureFileName, startupModel.StartupPicFileName);
+
+            return Task.FromResult(formData);
+        }
 
         public static bool IsMultipartContentType(string? contentType)
         {

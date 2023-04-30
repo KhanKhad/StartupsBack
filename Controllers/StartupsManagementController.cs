@@ -15,6 +15,7 @@ using System;
 using System.Linq;
 using System.Text;
 using StartupsBack.ViewModels.ActionsResults;
+using System.Xml.Linq;
 
 namespace StartupsBack.Controllers
 {
@@ -71,6 +72,26 @@ namespace StartupsBack.Controllers
             var createStartupResult = await _startupsManager.CreateStartupAsync(startupParseResult.StartupOrNull, startupParseResult.AuthorNameOrEmpty, startupParseResult.StartupHash);
 
             return Json(new { Result = createStartupResult.StartupCreateResultType.ToString(), ErrorOrEmpty = createStartupResult.ErrorOrNull == null ? string.Empty : createStartupResult.ErrorOrNull.Message });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetStartupsIds(int pageNumber, int pageSize)
+        {
+            var startupsIds = await _startupsManager.GetStartupsIds(pageNumber, pageSize);
+            return Json(startupsIds);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetStartupById(int id)
+        {
+            var startup = await _startupsManager.GetStartupModelAsync(id);
+
+            if (startup == null)
+            {
+                return BadRequest(new { Result = "NotFound" });
+            }
+
+            return new MultiformActionResult(startup, false, true);
         }
     }
 }

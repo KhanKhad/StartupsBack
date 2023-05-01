@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace StartupsBack.ViewModels
 {
-    public class UserControlViewModel
+    public class UsersManagmentViewModel
     {
         private readonly ILogger _logger;
         private readonly MainDb _dbContext;
-        public UserControlViewModel(ILogger logger, MainDb dbContext) 
+        public UsersManagmentViewModel(ILogger logger, MainDb dbContext) 
         {
             _logger = logger;
             _dbContext = dbContext;
@@ -93,6 +93,13 @@ namespace StartupsBack.ViewModels
                 return AuthenticationResult.UnknownError(ex);
             }
         }
+
+        public async Task<UserModel?> GetUserById(int id)
+        {
+            var user = await _dbContext.UsersDB.FirstOrDefaultAsync(i => i.Id == id);
+            return user;
+        }
+
 
         private static string GenerateToken()
         {

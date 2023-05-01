@@ -9,6 +9,7 @@ namespace StartupsBack.Models.DbModels
         public int Id { get; set; }
 
         public string Message { get; set; } = string.Empty;
+
         public int SenderForeignKey { get; set; }
         public UserModel? Sender { get; set; }
 

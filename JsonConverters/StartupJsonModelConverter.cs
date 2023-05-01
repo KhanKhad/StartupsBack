@@ -56,7 +56,7 @@ namespace StartupsBack.JsonConverters
             writer.WriteStartObject();
 
             writer.WriteString("StartupCreateResult", startup.StartupCreateResult.ToString());
-            writer.WriteString("StartupId", startup.StartupId.ToString());
+            writer.WriteString(JsonConstants.StartupId, startup.StartupId.ToString());
             writer.WriteString("ErrorOrEmpty", startup.ErrorOrEmpty);
 
             writer.WriteEndObject();

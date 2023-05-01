@@ -23,7 +23,7 @@ namespace StartupsBack.Controllers
     {
         private readonly ILogger<ProfileController> _logger;
         private readonly MainDb _dbContext;
-        private readonly UserControlViewModel _userControl;
+        private readonly UsersManagmentViewModel _userControl;
         private readonly string[] _permittedExtensions = { ".txt", ".png", ".jpg", ".jpeg" };
         private readonly long _fileSizeLimit;
 
@@ -32,7 +32,7 @@ namespace StartupsBack.Controllers
             _logger = logger;
             _dbContext = dbContext;
             _fileSizeLimit = 1048576 * 3;
-            _userControl = new UserControlViewModel(_logger, _dbContext);
+            _userControl = new UsersManagmentViewModel(_logger, _dbContext);
         }
 
         //http://localhost/profile/createuser

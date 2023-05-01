@@ -88,7 +88,7 @@ namespace StartupsBack.ViewModels
 
 
         private const string _hashKey = "It's my startup!";
-        private async Task<string> CalculateHash(string authorName, string authorToken)
+        private static async Task<string> CalculateHash(string authorName, string authorToken)
         {
             using SHA256 mySHA256 = SHA256.Create();
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(authorName + authorToken + _hashKey));

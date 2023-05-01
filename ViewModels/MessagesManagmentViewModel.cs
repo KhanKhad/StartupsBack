@@ -86,6 +86,23 @@ namespace StartupsBack.ViewModels
             }
         }
 
+        public async Task<GetDeltaResult> GetDelta(string name)
+        {
+            try
+            {
+                var author = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
+                
+                if (author == null) return GetDeltaResult.UserNotFound();
+
+                return GetDeltaResult.Success(author.Delta);
+            }
+            catch (Exception ex)
+            {
+                return GetDeltaResult.UnknownError(ex);
+            }
+        }
+
+
         private const string _hashKey = "It's my message!";
         private static async Task<string> CalculateHash(string authorName, string authorToken)
         {

@@ -43,5 +43,15 @@ namespace StartupsBack.Controllers
             
             return Json(getMessagesResult.MessagesOrNull);
         }
+
+        public async Task<IActionResult> GetDelta(string name)
+        {
+            var getMessagesResult = await _messagesManagment.GetDelta(name);
+
+            if (getMessagesResult.Delta == -1)
+                return BadRequest(new { Result = getMessagesResult.GetDeltaResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });
+
+            return Json(getMessagesResult.Delta);
+        }
     }
 }

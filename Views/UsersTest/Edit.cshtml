@@ -1,0 +1,69 @@
+﻿@model StartupsBack.Models.DbModels.UserModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>UserModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Token" class="control-label"></label>
+                <input asp-for="Token" class="form-control" />
+                <span asp-validation-for="Token" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PasswordHash" class="control-label"></label>
+                <input asp-for="PasswordHash" class="form-control" />
+                <span asp-validation-for="PasswordHash" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UserType" class="control-label"></label>
+                <select asp-for="UserType" class="form-control"></select>
+                <span asp-validation-for="UserType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AccountCreated" class="control-label"></label>
+                <input asp-for="AccountCreated" class="form-control" />
+                <span asp-validation-for="AccountCreated" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfilePic" class="control-label"></label>
+                <input asp-for="ProfilePic" class="form-control" />
+                <span asp-validation-for="ProfilePic" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfilePicFileName" class="control-label"></label>
+                <input asp-for="ProfilePicFileName" class="form-control" />
+                <span asp-validation-for="ProfilePicFileName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Delta" class="control-label"></label>
+                <input asp-for="Delta" class="form-control" />
+                <span asp-validation-for="Delta" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

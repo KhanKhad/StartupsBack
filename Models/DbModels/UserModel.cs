@@ -24,6 +24,11 @@ namespace StartupsBack.Models.DbModels
         public List<StartupModel> PublishedStartups { get; set; } = new List<StartupModel>();
         public List<StartupModel> History { get; set; } = new List<StartupModel>();
         public List<StartupModel> Projects { get; set; } = new List<StartupModel>();
+
+        public List<MessageModel> SendedMessages { get; set; } = new List<MessageModel>();
+        public List<MessageModel> GettedMessages { get; set; } = new List<MessageModel>();
+
+        public int Delta { get; set; }
     }
     public enum UserTypes
     {

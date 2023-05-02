@@ -19,7 +19,7 @@ namespace StartupsBack.Controllers
         {
             _logger = logger;
             _dbContext = dbContext;
-            _messagesManagment = new MessagesManagmentViewModel(logger, dbContext);
+            _messagesManagment = new MessagesManagmentViewModel(_logger, _dbContext);
         }
 
         public async Task<IActionResult> SendMessage()

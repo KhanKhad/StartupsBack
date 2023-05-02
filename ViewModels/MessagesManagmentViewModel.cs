@@ -50,7 +50,7 @@ namespace StartupsBack.ViewModels
                     MessageSended = DateTime.UtcNow
                 };
 
-                sender.Delta++;
+                recipient.Delta++;
 
                 var res = await _dbContext.MessagesDB.AddAsync(messageModel);
                 await _dbContext.SaveChangesAsync();

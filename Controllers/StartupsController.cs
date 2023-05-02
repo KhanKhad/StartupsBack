@@ -19,14 +19,14 @@ using System.Xml.Linq;
 
 namespace StartupsBack.Controllers
 {
-    public class StartupsManagementController : Controller
+    public class StartupsController : Controller
     {
-        private readonly ILogger<StartupsManagementController> _logger;
+        private readonly ILogger<StartupsController> _logger;
         private readonly MainDb _dbContext;
         private readonly StartupsManagementViewModel _startupsManager;
         private readonly string[] _permittedExtensions = { ".png", ".jpg", ".jpeg" };
         private readonly long _fileSizeLimit;
-        public StartupsManagementController(ILogger<StartupsManagementController> logger, MainDb dbContext) 
+        public StartupsController(ILogger<StartupsController> logger, MainDb dbContext) 
         {
             _logger = logger;
             _dbContext = dbContext;

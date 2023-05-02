@@ -10,23 +10,23 @@ using StartupsBack.Models.DbModels;
 
 namespace StartupsBack.Controllers
 {
-    public class StartupsManagmentTestController : Controller
+    public class StartupsTestController : Controller
     {
         private readonly MainDb _context;
 
-        public StartupsManagmentTestController(MainDb context)
+        public StartupsTestController(MainDb context)
         {
             _context = context;
         }
 
-        // GET: StartupsManagmentTest
+        // GET: StartupsTest
         public async Task<IActionResult> Index()
         {
             var mainDb = _context.StartupsDB.Include(s => s.Author);
             return View(await mainDb.ToListAsync());
         }
 
-        // GET: StartupsManagmentTest/Details/5
+        // GET: StartupsTest/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.StartupsDB == null)
@@ -45,14 +45,14 @@ namespace StartupsBack.Controllers
             return View(startupModel);
         }
 
-        // GET: StartupsManagmentTest/Create
+        // GET: StartupsTest/Create
         public IActionResult Create()
         {
             ViewData["AuthorForeignKey"] = new SelectList(_context.UsersDB, "Id", "Id");
             return View();
         }
 
-        // POST: StartupsManagmentTest/Create
+        // POST: StartupsTest/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -69,7 +69,7 @@ namespace StartupsBack.Controllers
             return View(startupModel);
         }
 
-        // GET: StartupsManagmentTest/Edit/5
+        // GET: StartupsTest/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.StartupsDB == null)
@@ -86,7 +86,7 @@ namespace StartupsBack.Controllers
             return View(startupModel);
         }
 
-        // POST: StartupsManagmentTest/Edit/5
+        // POST: StartupsTest/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -122,7 +122,7 @@ namespace StartupsBack.Controllers
             return View(startupModel);
         }
 
-        // GET: StartupsManagmentTest/Delete/5
+        // GET: StartupsTest/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.StartupsDB == null)
@@ -141,7 +141,7 @@ namespace StartupsBack.Controllers
             return View(startupModel);
         }
 
-        // POST: StartupsManagmentTest/Delete/5
+        // POST: StartupsTest/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

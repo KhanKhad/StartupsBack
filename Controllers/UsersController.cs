@@ -21,7 +21,7 @@ namespace StartupsBack.Controllers
         }
 
 
-        public async Task<IActionResult> GetUser(int id)
+        public async Task<IActionResult> GetUserById(int id)
         {
             var user = await _userControl.GetUserById(id);
             if(user == null) return NotFound();

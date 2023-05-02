@@ -2,6 +2,7 @@
 {
     public static class JsonConstants
     {
+        public const string UserId = "userid";
         public const string UserName = "username";
         public const string UserPassword = "password";
         public const string UserMail = "email";

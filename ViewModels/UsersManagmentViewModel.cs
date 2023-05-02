@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using StartupsBack.Database;
@@ -42,6 +43,10 @@ namespace StartupsBack.ViewModels
                 userModel.PasswordHash = await GetHashAsync(userModel.PasswordHash);
                 var user = await _dbContext.UsersDB.AddAsync(userModel);
                 await _dbContext.SaveChangesAsync();
+
+                user.Entity.ProfilePicFileName = $"id#{user.Entity.Id}_{userModel.ProfilePicFileName}";
+                await _dbContext.SaveChangesAsync();
+
                 return UserCreateResult.Success(user.Entity);
             }
             catch (DbUpdateException ex)

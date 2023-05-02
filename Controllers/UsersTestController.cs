@@ -56,7 +56,7 @@ namespace StartupsBack.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Token,Name,PasswordHash,UserType,AccountCreated,ProfilePic,ProfilePicFileName,Delta")] UserModel userModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,PasswordHash,AccountCreated,ProfilePicFileName,Delta")] UserModel userModel)
         {
             if (ModelState.IsValid)
             {
@@ -88,7 +88,7 @@ namespace StartupsBack.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Token,Name,PasswordHash,UserType,AccountCreated,ProfilePic,ProfilePicFileName,Delta")] UserModel userModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Token,Name,PasswordHash,AccountCreated,ProfilePic,ProfilePicFileName,Delta")] UserModel userModel)
         {
             if (id != userModel.Id)
             {

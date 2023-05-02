@@ -123,7 +123,8 @@ namespace StartupsBack.Utilities
 
             if (isMine)
                 formData.Add(new StringContent(userModel.Token), JsonConstants.UserToken);
-
+            
+            formData.Add(new StringContent(userModel.Id.ToString()), JsonConstants.UserId);
             formData.Add(new StringContent(userModel.Name), JsonConstants.UserName);
 
             if (needFull)

@@ -57,7 +57,7 @@ namespace StartupsBack.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,StartupPublished,AuthorForeignKey,Picture,StartupPicFileName,Viewers,LastModify")] StartupModel startupModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,StartupPublished,AuthorForeignKey,StartupPicFileName,Viewers,LastModify")] StartupModel startupModel)
         {
             if (ModelState.IsValid)
             {
@@ -91,7 +91,7 @@ namespace StartupsBack.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,StartupPublished,AuthorForeignKey,Picture,StartupPicFileName,Viewers,LastModify")] StartupModel startupModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,StartupPublished,AuthorForeignKey,StartupPicFileName,Viewers,LastModify")] StartupModel startupModel)
         {
             if (id != startupModel.Id)
             {

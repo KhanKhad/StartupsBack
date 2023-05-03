@@ -109,7 +109,7 @@ namespace StartupsBack.ViewModels
             using SHA256 mySHA256 = SHA256.Create();
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(authorName + authorToken + _hashKey));
             var byteResult = await mySHA256.ComputeHashAsync(stream);
-            return Convert.ToBase64String(byteResult);
+            return Convert.ToBase64String(byteResult).Replace("+", "").Replace("/", "");
         }
     }
 }

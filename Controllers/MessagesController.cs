@@ -41,7 +41,7 @@ namespace StartupsBack.Controllers
             if(getMessagesResult.MessagesOrNull == null)
                 return BadRequest(new { Result = getMessagesResult.GetMessagesResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });
             
-            return Json(new { Messages = getMessagesResult.MessagesOrNull });
+            return Json(getMessagesResult.MessagesOrNull);
         }
 
         public async Task<IActionResult> GetDelta(string name)

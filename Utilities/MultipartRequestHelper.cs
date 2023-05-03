@@ -235,6 +235,7 @@ namespace StartupsBack.Utilities
             var formData = new MultipartFormDataContent(formDataBoundary);
 
             formData.Add(new StringContent(startupModel.Id.ToString()), JsonConstants.StartupId);
+            formData.Add(new StringContent(startupModel.AuthorForeignKey.ToString()), JsonConstants.StartupAuthorId);
             formData.Add(new StringContent(startupModel.Name), JsonConstants.StartupName);
             formData.Add(new StringContent(startupModel.Description), JsonConstants.StartupDescription);
             

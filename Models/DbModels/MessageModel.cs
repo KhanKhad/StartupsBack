@@ -1,19 +1,27 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using StartupsBack.JsonConverters;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace StartupsBack.Models.DbModels
 {
     public class MessageModel
     {
-        [Key]
+        [Key, JsonProperty(JsonConstants.MessageId)]
         public int Id { get; set; }
-
+        [JsonProperty(JsonConstants.MessageText)]
         public string Message { get; set; } = string.Empty;
 
+        [JsonProperty(JsonConstants.MessageSender)]
         public int SenderForeignKey { get; set; }
+
+        [JsonIgnore]
         public UserModel? Sender { get; set; }
 
+        [JsonProperty(JsonConstants.MessageRecipient)]
         public int RecipientForeignKey { get; set; }
+
+        [JsonIgnore]
         public UserModel? Recipient { get; set; }
 
         public DateTime MessageSended { get; set; }

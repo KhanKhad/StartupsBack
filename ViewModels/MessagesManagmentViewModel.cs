@@ -47,10 +47,9 @@ namespace StartupsBack.ViewModels
                     Message = message,
                     Recipient = recipient,
                     Sender = sender,
-                    MessageSended = DateTime.UtcNow
+                    MessageSended = DateTime.UtcNow,
+                    Delta = ++recipient.Delta
                 };
-
-                recipient.Delta++;
 
                 var res = await _dbContext.MessagesDB.AddAsync(messageModel);
                 await _dbContext.SaveChangesAsync();
@@ -63,7 +62,7 @@ namespace StartupsBack.ViewModels
             }
         }
 
-        public async Task<GetMessagesResult> GetMessagesAsync(string name, string hash)
+        public async Task<GetMessagesResult> GetMessagesAsync(string name, string hash, int delta)
         {
             try
             {

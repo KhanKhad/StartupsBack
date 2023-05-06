@@ -26,10 +26,10 @@ namespace StartupsBack.JsonConverters
                         case JsonConstants.MessageText when reader.TokenType == JsonTokenType.String:
                             message = reader.GetString();
                             break;
-                        case JsonConstants.MessageRecipient when reader.TokenType == JsonTokenType.String:
+                        case JsonConstants.MessageRecipientName when reader.TokenType == JsonTokenType.String:
                             recipient = reader.GetString();
                             break;
-                        case JsonConstants.MessageSender when reader.TokenType == JsonTokenType.String:
+                        case JsonConstants.MessageSenderName when reader.TokenType == JsonTokenType.String:
                             sender = reader.GetString();
                             break;
                         case JsonConstants.MessageHash when reader.TokenType == JsonTokenType.String:

@@ -34,9 +34,9 @@ namespace StartupsBack.Controllers
             return Json(new { Result = sendMessageResult.SendMessageResultType.ToString(), ErrorOrEmpty = sendMessageResult.ErrorOrNull == null ? string.Empty : sendMessageResult.ErrorOrNull.Message });
         }
 
-        public async Task<IActionResult> GetMessages(string name, string hash)
+        public async Task<IActionResult> GetMessages(string name, string hash, int delta)
         {
-            var getMessagesResult = await _messagesManagment.GetMessagesAsync(name, hash);
+            var getMessagesResult = await _messagesManagment.GetMessagesAsync(name, hash, delta);
 
             if(getMessagesResult.MessagesOrNull == null)
                 return BadRequest(new { Result = getMessagesResult.GetMessagesResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });

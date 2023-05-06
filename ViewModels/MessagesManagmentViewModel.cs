@@ -48,7 +48,8 @@ namespace StartupsBack.ViewModels
                     Recipient = recipient,
                     Sender = sender,
                     MessageSended = DateTime.UtcNow,
-                    Delta = ++recipient.Delta
+                    RecipientDelta = ++recipient.Delta,
+                    SenderDelta = ++sender.Delta,
                 };
 
                 var res = await _dbContext.MessagesDB.AddAsync(messageModel);
@@ -66,7 +67,7 @@ namespace StartupsBack.ViewModels
         {
             try
             {
-                var author = await _dbContext.UsersDB.Include(i=>i.GettedMessages)
+                var author = await _dbContext.UsersDB.Include(i=>i.GettedMessages).Include(i => i.SendedMessages)
                     .FirstOrDefaultAsync(user => user.Name == name);
 
                 if (author == null)
@@ -77,7 +78,10 @@ namespace StartupsBack.ViewModels
                 if (myHash != hash)
                     return GetMessagesResult.AuthenticationFailed();
 
-                return GetMessagesResult.Success(author.GettedMessages.ToArray());
+                var result = author.GettedMessages.ToList();
+                result.AddRange(author.SendedMessages);
+
+                return GetMessagesResult.Success(result.ToArray());
             }
             catch (Exception ex)
             {

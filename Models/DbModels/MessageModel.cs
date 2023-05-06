@@ -33,7 +33,9 @@ namespace StartupsBack.Models.DbModels
         public bool IsGetted { get; set; }
         [JsonProperty(JsonConstants.MessageIsReaded)]
         public bool IsReaded { get; set; }
-        [JsonProperty(JsonConstants.MessageDelta)]
-        public int Delta { get; set; }
+        [JsonProperty(JsonConstants.MessageRecipientDelta)]
+        public int RecipientDelta { get; set; }
+        [JsonProperty(JsonConstants.MessageSenderDelta)]
+        public int SenderDelta { get; set; }
     }
 }

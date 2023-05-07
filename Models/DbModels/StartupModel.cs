@@ -26,5 +26,9 @@ namespace StartupsBack.Models.DbModels
         public DateTime LastModify { get; set; }
 
         public List<UserModel> Contributors { get; set; } = new List<UserModel>();
+
+        public List<UserModel> WantToJoin { get; set; } = new List<UserModel>();
+        public List<UserModel> AccsessDenied { get; set; } = new List<UserModel>();
+
     }
 }

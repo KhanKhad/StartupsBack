@@ -43,8 +43,8 @@ namespace StartupsBack.ViewModels
         {
             try
             {
-                var author = await _dbContext.UsersDB.Include(user => user.PublishedStartups)
-                    .FirstOrDefaultAsync(user => user.Name == authorName);
+                var author = await _dbContext.UsersDB.Where(user => user.Name == authorName)
+                    .Include(user => user.PublishedStartups).FirstOrDefaultAsync();
 
                 if (author == null)
                     return StartupCreateResult.AuthorNotFound();
@@ -79,12 +79,24 @@ namespace StartupsBack.ViewModels
             var ids = await _dbContext.StartupsDB.Select(i=>i.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToArrayAsync();
             return ids;
         }
+        public async Task<int[]> GetMyStartupsIds(int id, int pageNumber, int pageSize)
+        {
+            var user = await _dbContext.UsersDB.Where(i => i.Id == id).Include(i=>i.ContributingProjects).FirstOrDefaultAsync();
 
+            if(user == null) return Array.Empty<int>();
+            var allStartups = user.ContributingProjects.Select(i=>i.Id).ToList();
+
+            var ids = allStartups.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToArray();
+            return ids;
+        }
         public async Task<StartupModel?> GetStartupModelAsync(int id)
         {
-            var startup = await _dbContext.StartupsDB.FirstOrDefaultAsync(startup => startup.Id == id);
+            var startup = await _dbContext.StartupsDB.Include(i => i.Contributors)
+                .FirstOrDefaultAsync(startup => startup.Id == id);
+
             return startup;
         }
+
 
 
         private const string _hashKey = "It's my startup!";

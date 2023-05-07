@@ -24,6 +24,14 @@ namespace StartupsBack.Database
 
             modelBuilder.Entity<StartupModel>()
                 .HasMany(st => st.Contributors)
+                .WithMany(user => user.ContributingProjects);
+
+            modelBuilder.Entity<StartupModel>()
+                .HasMany(st => st.WantToJoin)
+                .WithMany();
+
+            modelBuilder.Entity<StartupModel>()
+                .HasMany(st => st.AccsessDenied)
                 .WithMany();
 
             modelBuilder.Entity<MessageModel>()
@@ -40,14 +48,6 @@ namespace StartupsBack.Database
 
             modelBuilder.Entity<UserModel>()
                 .HasMany(user => user.History)
-                .WithMany();
-
-            modelBuilder.Entity<UserModel>()
-                .HasMany(user => user.FavoriteStartups)
-                .WithMany();
-
-            modelBuilder.Entity<UserModel>()
-                .HasMany(user => user.Projects)
                 .WithMany();
         }
     }

@@ -22,9 +22,8 @@ namespace StartupsBack.Models.DbModels
         public byte[] ProfilePic { get; set; } = Array.Empty<byte>();
         public string ProfilePicFileName { get; set; } = string.Empty;
         public List<StartupModel> PublishedStartups { get; set; } = new List<StartupModel>();
-        public List<StartupModel> FavoriteStartups { get; set; } = new List<StartupModel>();
         public List<StartupModel> History { get; set; } = new List<StartupModel>();
-        public List<StartupModel> Projects { get; set; } = new List<StartupModel>();
+        public List<StartupModel> ContributingProjects { get; set; } = new List<StartupModel>();
 
         public List<MessageModel> SendedMessages { get; set; } = new List<MessageModel>();
         public List<MessageModel> GettedMessages { get; set; } = new List<MessageModel>();

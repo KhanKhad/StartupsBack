@@ -93,5 +93,12 @@ namespace StartupsBack.Controllers
 
             return new MultiformActionResult(startup, false, true);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMyStartupsIds(int id, int pageNumber, int pageSize)
+        {
+            var startupsIds = await _startupsManager.GetMyStartupsIds(id, pageNumber, pageSize);
+            return Json(startupsIds);
+        }
     }
 }

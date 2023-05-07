@@ -43,6 +43,10 @@ namespace StartupsBack.Database
                 .WithMany();
 
             modelBuilder.Entity<UserModel>()
+                .HasMany(user => user.FavoriteStartups)
+                .WithMany();
+
+            modelBuilder.Entity<UserModel>()
                 .HasMany(user => user.Projects)
                 .WithMany();
         }

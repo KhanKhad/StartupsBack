@@ -78,8 +78,8 @@ namespace StartupsBack.ViewModels
                 if (myHash != hash)
                     return GetMessagesResult.AuthenticationFailed();
 
-                var result = author.GettedMessages.ToList();
-                result.AddRange(author.SendedMessages);
+                var result = author.GettedMessages.Where(i=>i.RecipientDelta > delta).ToList();
+                result.AddRange(author.SendedMessages.Where(i=>i.SenderDelta > delta));
 
                 return GetMessagesResult.Success(result.ToArray());
             }

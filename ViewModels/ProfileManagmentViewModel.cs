@@ -29,7 +29,6 @@ namespace StartupsBack.ViewModels
         {
             var user = new UserModel
             {
-                AccountCreated = DateTime.UtcNow,
                 Name = userJsonModel.Name,
                 PasswordHash = userJsonModel.Password,
                 ProfilePic = userJsonModel.ProfilePic,
@@ -41,6 +40,8 @@ namespace StartupsBack.ViewModels
         {
             try
             {
+                userModel.AccountCreated = DateTime.UtcNow;
+                userModel.LastModify = DateTime.UtcNow;
                 userModel.PasswordHash = await GetHashAsync(userModel.PasswordHash);
                 var user = await _dbContext.UsersDB.AddAsync(userModel);
                 await _dbContext.SaveChangesAsync();
@@ -141,34 +142,123 @@ namespace StartupsBack.ViewModels
             }
         }
 
-        public async Task<JoinConfurmResult> ConfurmJoin(int id, string hash, int startupId, int userid)
+        public async Task<AcceptUserResult> AcceptUserToStartup(int id, string hash, int startupId, int userid)
         {
             try
             {
-                var author = await _dbContext.UsersDB.Where(u => u.Id == id)
-                    .Include(user => user.PublishedStartups).FirstOrDefaultAsync();
+                var author = await _dbContext.UsersDB.Where(u => u.Id == id).FirstOrDefaultAsync();
 
                 if (author == null)
-                    return JoinConfurmResult.AuthenticationFailed();
+                    return AcceptUserResult.AuthorNotFound();
 
-                var myHash = await GetHashAsync("");
+                var myHash = await GetHashAsync(author.Name + author.Token);
 
                 if (myHash != hash)
-                    return JoinConfurmResult.AuthenticationFailed();
+                    return AcceptUserResult.AuthenticationFailed();
 
-                if (author.PublishedStartups.FirstOrDefault(st => st.Name == startup.Name) != null)
-                    return JoinConfurmResult.AlreadyJoined();
+                var startup = await _dbContext.StartupsDB.Where(st => st.Id == startupId)
+                    .Include(st => st.WantToJoin).Include(st => st.AccsessDenied).Include(st => st.Contributors).FirstOrDefaultAsync();
 
-                startup.Author = author;
-                startup.Contributors.Add(author);
+                if (startup == null)
+                    return AcceptUserResult.StartupNotFound();
 
-                await _dbContext.SaveChangesAsync();
+                if(startup.AuthorForeignKey != id)
+                    return AcceptUserResult.NotAuthor();
 
-                return JoinConfurmResult.RequestSended();
+                var user = await _dbContext.UsersDB.Where(u => u.Id == userid).FirstOrDefaultAsync();
+
+                if (user == null)
+                    return AcceptUserResult.UserNotFound();
+
+                if(startup.Contributors.Contains(user))
+                    return AcceptUserResult.AlreadyJoined();
+
+                if (startup.WantToJoin.Contains(user))
+                {
+                    startup.WantToJoin.Remove(user);
+
+                    startup.Contributors.Add(user);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return AcceptUserResult.SuccessJoined();
+                }
+                else if (startup.AccsessDenied.Contains(user))
+                {
+                    startup.AccsessDenied.Remove(user);
+                    startup.Contributors.Add(user);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return AcceptUserResult.SuccessJoined();
+                }
+                else
+                    return AcceptUserResult.UserDontSendRequest();
+                
             }
             catch (Exception ex)
             {
-                return JoinConfurmResult.UnknownError(ex);
+                return AcceptUserResult.UnknownError(ex);
+            }
+        }
+        public async Task<RejectUserResult> RejectUserToStartup(int id, string hash, int startupId, int userid)
+        {
+            try
+            {
+                var author = await _dbContext.UsersDB.Where(u => u.Id == id).FirstOrDefaultAsync();
+
+                if (author == null)
+                    return RejectUserResult.AuthorNotFound();
+
+                var myHash = await GetHashAsync(author.Name + author.Token);
+
+                if (myHash != hash)
+                    return RejectUserResult.AuthenticationFailed();
+
+                var startup = await _dbContext.StartupsDB.Where(st => st.Id == startupId)
+                    .Include(st => st.WantToJoin).Include(st => st.AccsessDenied).Include(st => st.Contributors).FirstOrDefaultAsync();
+
+                if (startup == null)
+                    return RejectUserResult.StartupNotFound();
+
+                if (startup.AuthorForeignKey != id)
+                    return RejectUserResult.NotAuthor();
+
+                var user = await _dbContext.UsersDB.Where(u => u.Id == userid).FirstOrDefaultAsync();
+
+                if (user == null)
+                    return RejectUserResult.UserNotFound();
+
+                if (startup.AccsessDenied.Contains(user))
+                    return RejectUserResult.AlreadyDenied();
+
+                if (startup.WantToJoin.Contains(user))
+                {
+                    startup.WantToJoin.Remove(user);
+
+                    startup.AccsessDenied.Add(user);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return RejectUserResult.SuccessDenied();
+                }
+                else if (startup.Contributors.Contains(user))
+                {
+                    startup.Contributors.Remove(user);
+
+                    startup.AccsessDenied.Add(user);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return RejectUserResult.SuccessDenied();
+                }
+                else
+                    return RejectUserResult.UserDontSendRequest();
+
+            }
+            catch (Exception ex)
+            {
+                return RejectUserResult.UnknownError(ex);
             }
         }
 

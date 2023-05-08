@@ -107,16 +107,22 @@ namespace StartupsBack.Controllers
             return new MultiformActionResult(userAuthenticateResult.UserOrNull, true, true);
         }
 
-        public async Task<IActionResult> JoinToStartup(int id, string hash, int startupId)
+        public async Task<IActionResult> TryToJoinToStartup(int id, string hash, int startupId)
         {
             var userAuthenticateResult = await _profileControl.TryToJoinToStartup(id, hash, startupId);
             return Json(new { Result = userAuthenticateResult.JoinToStartupResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
         }
 
-        public async Task<IActionResult> ConfurmJoin(int id, string hash, int startupId, int userid)
+        public async Task<IActionResult> AcceptUserToStartup(int id, string hash, int startupId, int userid)
         {
-            var userAuthenticateResult = await _profileControl.ConfurmJoin(id, hash, startupId, userid);
-            return Json(new { Result = userAuthenticateResult.JoinToStartupResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
+            var userAuthenticateResult = await _profileControl.AcceptUserToStartup(id, hash, startupId, userid);
+            return Json(new { Result = userAuthenticateResult.AcceptUserResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
+        }
+
+        public async Task<IActionResult> RejectUserToStartup(int id, string hash, int startupId, int userid)
+        {
+            var userAuthenticateResult = await _profileControl.RejectUserToStartup(id, hash, startupId, userid);
+            return Json(new { Result = userAuthenticateResult.RejectUserResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
         }
     }
 }

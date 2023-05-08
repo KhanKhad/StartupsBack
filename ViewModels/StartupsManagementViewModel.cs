@@ -59,6 +59,8 @@ namespace StartupsBack.ViewModels
 
                 startup.Author = author;
                 startup.Contributors.Add(author);
+                startup.StartupPublished = DateTime.UtcNow;
+                startup.LastModify = DateTime.UtcNow;
 
                 var res = await _dbContext.StartupsDB.AddAsync(startup);
                 await _dbContext.SaveChangesAsync();

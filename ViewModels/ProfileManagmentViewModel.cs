@@ -7,6 +7,7 @@ using StartupsBack.Models.DbModels;
 using StartupsBack.Models.JsonModels;
 using StartupsBack.ViewModels.ActionsResults;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -101,6 +102,44 @@ namespace StartupsBack.ViewModels
             }
         }
 
+        public async Task<GetDeltaResult> GetStartupsDelta(int id)
+        {
+            try
+            {
+                var author = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Id == id);
+
+                if (author == null) return GetDeltaResult.UserNotFound();
+
+                return GetDeltaResult.Success(author.StartupsDelta);
+            }
+            catch (Exception ex)
+            {
+                return GetDeltaResult.UnknownError(ex);
+            }
+        }
+
+        public async Task<StartupJoinRequestJsonModel[]> GetStartupsJoinRequestes(int id)
+        {
+            var author = await _dbContext.UsersDB.Where(user => user.Id == id)
+                .Include(i=>i.PublishedStartups).ThenInclude(i=>i.WantToJoin).FirstOrDefaultAsync();
+
+            if(author == null) return Array.Empty<StartupJoinRequestJsonModel>();
+
+            var requestes = new List<StartupJoinRequestJsonModel>();
+
+            foreach (var startup in author.PublishedStartups)
+            {
+                var request = new StartupJoinRequestJsonModel()
+                {
+                    StartupId = startup.Id,
+                    UsersWantToJoin = startup.WantToJoin.Select(i=>i.Id).ToArray(),
+                };
+                requestes.Add(request);
+            }
+
+            return requestes.ToArray();
+        }
+
         public async Task<JoinToStartupResult> TryToJoinToStartup(int id, string hash, int startupId)
         {
             try
@@ -110,7 +149,7 @@ namespace StartupsBack.ViewModels
                 if (userWantToJoin == null)
                     return JoinToStartupResult.UserNotFound();
 
-                var myHash = await GetHashAsync(userWantToJoin.Name + userWantToJoin.Token);
+                var myHash = await GetProfileHashAsync(userWantToJoin.Name, userWantToJoin.Token);
 
                 if (myHash != hash)
                     return JoinToStartupResult.AuthenticationFailed();
@@ -119,7 +158,7 @@ namespace StartupsBack.ViewModels
                     return JoinToStartupResult.AlreadyJoined();
 
                 var startup = await _dbContext.StartupsDB.Include(i=>i.Contributors)
-                    .Include(i=>i.AccsessDenied).Include(i=>i.WantToJoin).FirstOrDefaultAsync(i=>i.Id == startupId);
+                    .Include(i=>i.AccsessDenied).Include(i=>i.WantToJoin).Include(i => i.Author).FirstOrDefaultAsync(i=>i.Id == startupId);
 
                 if(startup == null)
                     return JoinToStartupResult.StartupNotFound();
@@ -131,6 +170,9 @@ namespace StartupsBack.ViewModels
                     return JoinToStartupResult.WaitForAnswer();
 
                 startup.WantToJoin.Add(userWantToJoin);
+
+                if(startup.Author != null)
+                    startup.Author.StartupsDelta += 1;
 
                 await _dbContext.SaveChangesAsync();
 
@@ -151,7 +193,7 @@ namespace StartupsBack.ViewModels
                 if (author == null)
                     return AcceptUserResult.AuthorNotFound();
 
-                var myHash = await GetHashAsync(author.Name + author.Token);
+                var myHash = await GetProfileHashAsync(author.Name, author.Token);
 
                 if (myHash != hash)
                     return AcceptUserResult.AuthenticationFailed();
@@ -179,6 +221,8 @@ namespace StartupsBack.ViewModels
 
                     startup.Contributors.Add(user);
 
+                    author.StartupsDelta -= 1;
+
                     await _dbContext.SaveChangesAsync();
 
                     return AcceptUserResult.SuccessJoined();
@@ -187,6 +231,8 @@ namespace StartupsBack.ViewModels
                 {
                     startup.AccsessDenied.Remove(user);
                     startup.Contributors.Add(user);
+
+                    author.StartupsDelta -= 1;
 
                     await _dbContext.SaveChangesAsync();
 
@@ -210,7 +256,7 @@ namespace StartupsBack.ViewModels
                 if (author == null)
                     return RejectUserResult.AuthorNotFound();
 
-                var myHash = await GetHashAsync(author.Name + author.Token);
+                var myHash = await GetProfileHashAsync(author.Name, author.Token);
 
                 if (myHash != hash)
                     return RejectUserResult.AuthenticationFailed();
@@ -238,6 +284,8 @@ namespace StartupsBack.ViewModels
 
                     startup.AccsessDenied.Add(user);
 
+                    author.StartupsDelta -= 1;
+
                     await _dbContext.SaveChangesAsync();
 
                     return RejectUserResult.SuccessDenied();
@@ -247,6 +295,8 @@ namespace StartupsBack.ViewModels
                     startup.Contributors.Remove(user);
 
                     startup.AccsessDenied.Add(user);
+
+                    author.StartupsDelta -= 1;
 
                     await _dbContext.SaveChangesAsync();
 
@@ -274,6 +324,15 @@ namespace StartupsBack.ViewModels
             var stream = new MemoryStream(Encoding.ASCII.GetBytes(input + _hashKey));
             var byteResult = await mySHA256.ComputeHashAsync(stream);
             return Convert.ToBase64String(byteResult);
+        }
+
+        private const string _profileHashKey = "My PProfile?";
+        public static async Task<string> GetProfileHashAsync(string name, string token)
+        {
+            using SHA256 mySHA256 = SHA256.Create();
+            var stream = new MemoryStream(Encoding.ASCII.GetBytes(name + token + _profileHashKey));
+            var byteResult = await mySHA256.ComputeHashAsync(stream);
+            return Convert.ToBase64String(byteResult).Replace("+", "").Replace("/", "");
         }
     }
 }

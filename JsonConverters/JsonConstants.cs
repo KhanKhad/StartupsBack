@@ -21,6 +21,7 @@ namespace StartupsBack.JsonConverters
         public const string StartupHash = "startuphash";
         public const string StartupPicturePropertyName = "startup_pic";
         public const string StartupPictureFileName = "s_picture";
+        public const string StartupWantToJoinList = "startupwanttojoinlist";
 
         public const string MessageId = "messageid";
         public const string MessageText = "messagetext";

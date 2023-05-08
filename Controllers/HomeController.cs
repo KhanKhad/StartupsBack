@@ -34,13 +34,13 @@ namespace StartupsBack.Controllers
 
         public async Task<IActionResult> Users()
         {
-            var users = await _dbContext.UsersDB.ToListAsync();
+            var users = await _dbContext.UsersDB.Include(i => i.ContributingProjects).ToListAsync();
             return Json(users);
         }
 
         public async Task<IActionResult> Startups()
         {
-            var startups = await _dbContext.StartupsDB.ToListAsync();
+            var startups = await _dbContext.StartupsDB.Include(i => i.Contributors).ToListAsync();
             return Json(startups);
         }
 

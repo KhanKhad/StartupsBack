@@ -107,6 +107,22 @@ namespace StartupsBack.Controllers
             return new MultiformActionResult(userAuthenticateResult.UserOrNull, true, true);
         }
 
+        public async Task<IActionResult> GetStartupDelta(int id)
+        {
+            var getMessagesResult = await _profileControl.GetStartupsDelta(id);
+
+            if (getMessagesResult.Delta == -1)
+                return BadRequest(new { Result = getMessagesResult.GetDeltaResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });
+
+            return Json(getMessagesResult.Delta);
+        }
+
+        public async Task<IActionResult> GetStartupJoinRequestes(int id)
+        {
+            var userAuthenticateResult = await _profileControl.GetStartupsJoinRequestes(id);
+            return Json(userAuthenticateResult);
+        }
+
         public async Task<IActionResult> TryToJoinToStartup(int id, string hash, int startupId)
         {
             var userAuthenticateResult = await _profileControl.TryToJoinToStartup(id, hash, startupId);

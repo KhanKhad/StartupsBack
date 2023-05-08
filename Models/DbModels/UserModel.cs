@@ -30,6 +30,7 @@ namespace StartupsBack.Models.DbModels
         public List<MessageModel> GettedMessages { get; set; } = new List<MessageModel>();
 
         public int Delta { get; set; }
+        public int StartupsDelta { get; set; }
     }
     public enum UserTypes
     {

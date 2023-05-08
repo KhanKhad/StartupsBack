@@ -154,16 +154,16 @@ namespace StartupsBack.ViewModels
                 if (myHash != hash)
                     return JoinToStartupResult.AuthenticationFailed();
 
-                if (userWantToJoin.ContributingProjects.FirstOrDefault(st => st.Id == id) != null)
-                    return JoinToStartupResult.AlreadyJoined();
-
                 var startup = await _dbContext.StartupsDB.Include(i=>i.Contributors)
                     .Include(i=>i.AccsessDenied).Include(i=>i.WantToJoin).Include(i => i.Author).FirstOrDefaultAsync(i=>i.Id == startupId);
 
                 if(startup == null)
                     return JoinToStartupResult.StartupNotFound();
 
-                if(startup.AccsessDenied.FirstOrDefault(i=>i.Id == id)!= null)
+                if (startup.Contributors.FirstOrDefault(i => i.Id == id) != null)
+                    return JoinToStartupResult.AlreadyJoined();
+
+                if (startup.AccsessDenied.FirstOrDefault(i=>i.Id == id)!= null)
                     return JoinToStartupResult.AccsessDenied();
 
                 if (startup.WantToJoin.FirstOrDefault(i => i.Id == id) != null)

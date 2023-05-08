@@ -107,7 +107,7 @@ namespace StartupsBack.Controllers
             return new MultiformActionResult(userAuthenticateResult.UserOrNull, true, true);
         }
 
-        public async Task<IActionResult> GetStartupDelta(int id)
+        public async Task<IActionResult> GetStartupsDelta(int id)
         {
             var getMessagesResult = await _profileControl.GetStartupsDelta(id);
 
@@ -117,7 +117,7 @@ namespace StartupsBack.Controllers
             return Json(getMessagesResult.Delta);
         }
 
-        public async Task<IActionResult> GetStartupJoinRequestes(int id)
+        public async Task<IActionResult> GetStartupsJoinRequestes(int id)
         {
             var userAuthenticateResult = await _profileControl.GetStartupsJoinRequestes(id);
             return Json(userAuthenticateResult);

@@ -16,7 +16,9 @@
       },
       "useSSL": false,
       "httpPort": 80,
-      "dotnetRunMessages": true
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:80",
+      "sslPort": 0
     }
   }
 }

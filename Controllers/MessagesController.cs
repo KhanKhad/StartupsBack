@@ -34,9 +34,9 @@ namespace StartupsBack.Controllers
             return Json(new { Result = sendMessageResult.SendMessageResultType.ToString(), ErrorOrEmpty = sendMessageResult.ErrorOrNull == null ? string.Empty : sendMessageResult.ErrorOrNull.Message });
         }
 
-        public async Task<IActionResult> GetMessages(string name, string hash, int delta)
+        public async Task<IActionResult> GetMessages(int id, string hash, int delta)
         {
-            var getMessagesResult = await _messagesManagment.GetMessagesAsync(name, hash, delta);
+            var getMessagesResult = await _messagesManagment.GetMessagesAsync(id, hash, delta);
 
             if(getMessagesResult.MessagesOrNull == null)
                 return BadRequest(new { Result = getMessagesResult.GetMessagesResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });
@@ -44,9 +44,9 @@ namespace StartupsBack.Controllers
             return Json(getMessagesResult.MessagesOrNull);
         }
 
-        public async Task<IActionResult> GetDelta(string name)
+        public async Task<IActionResult> GetDelta(int id)
         {
-            var getMessagesResult = await _messagesManagment.GetDelta(name);
+            var getMessagesResult = await _messagesManagment.GetDelta(id);
 
             if (getMessagesResult.Delta == -1)
                 return BadRequest(new { Result = getMessagesResult.GetDeltaResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });

@@ -63,17 +63,17 @@ namespace StartupsBack.ViewModels
             }
         }
 
-        public async Task<GetMessagesResult> GetMessagesAsync(string name, string hash, int delta)
+        public async Task<GetMessagesResult> GetMessagesAsync(int id, string hash, int delta)
         {
             try
             {
                 var author = await _dbContext.UsersDB.Include(i=>i.GettedMessages).Include(i => i.SendedMessages)
-                    .FirstOrDefaultAsync(user => user.Name == name);
+                    .FirstOrDefaultAsync(user => user.Id == id);
 
                 if (author == null)
                     return GetMessagesResult.UserNotFound();
 
-                var myHash = await CalculateHash(name, author.Token);
+                var myHash = await CalculateHash(author.Name, author.Token);
 
                 if (myHash != hash)
                     return GetMessagesResult.AuthenticationFailed();
@@ -89,11 +89,11 @@ namespace StartupsBack.ViewModels
             }
         }
 
-        public async Task<GetDeltaResult> GetDelta(string name)
+        public async Task<GetDeltaResult> GetDelta(int id)
         {
             try
             {
-                var author = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Name == name);
+                var author = await _dbContext.UsersDB.FirstOrDefaultAsync(user => user.Id == id);
                 
                 if (author == null) return GetDeltaResult.UserNotFound();
 

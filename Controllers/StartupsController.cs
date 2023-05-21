@@ -100,5 +100,38 @@ namespace StartupsBack.Controllers
             var startupsIds = await _startupsManager.GetMyStartupsIds(id, pageNumber, pageSize);
             return Json(startupsIds);
         }
+        public async Task<IActionResult> GetStartupsDelta(int id)
+        {
+            var getMessagesResult = await _startupsManager.GetStartupsDelta(id);
+
+            if (getMessagesResult.Delta == -1)
+                return BadRequest(new { Result = getMessagesResult.GetDeltaResultType.ToString(), ErrorOrEmpty = getMessagesResult.ErrorOrNull == null ? string.Empty : getMessagesResult.ErrorOrNull.Message });
+
+            return Json(getMessagesResult.Delta);
+        }
+
+        public async Task<IActionResult> GetStartupsJoinRequestes(int id)
+        {
+            var userAuthenticateResult = await _startupsManager.GetStartupsJoinRequestes(id);
+            return Json(userAuthenticateResult);
+        }
+
+        public async Task<IActionResult> TryToJoinToStartup(int id, string hash, int startupId)
+        {
+            var userAuthenticateResult = await _startupsManager.TryToJoinToStartup(id, hash, startupId);
+            return Json(new { Result = userAuthenticateResult.JoinToStartupResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
+        }
+
+        public async Task<IActionResult> AcceptUserToStartup(int id, string hash, int startupId, int userid)
+        {
+            var userAuthenticateResult = await _startupsManager.AcceptUserToStartup(id, hash, startupId, userid);
+            return Json(new { Result = userAuthenticateResult.AcceptUserResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
+        }
+
+        public async Task<IActionResult> RejectUserToStartup(int id, string hash, int startupId, int userid)
+        {
+            var userAuthenticateResult = await _startupsManager.RejectUserToStartup(id, hash, startupId, userid);
+            return Json(new { Result = userAuthenticateResult.RejectUserResultType.ToString(), ErrorOrEmpty = userAuthenticateResult.ErrorOrNull == null ? string.Empty : userAuthenticateResult.ErrorOrNull.Message });
+        }
     }
 }
